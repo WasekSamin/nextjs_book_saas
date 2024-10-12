@@ -19,7 +19,8 @@ body.dark {
   }
 
   .nav-layout,
-  .base-layout {
+  .base-layout,
+  .absolute-layout {
     @apply px-5 md:px-10 lg:px-20;
   }
 
@@ -87,7 +88,7 @@ body.dark {
   }
 
   .dark .theme-block {
-    @apply bg-stone-800/60;
+    @apply bg-stone-800;
   }
 
   .border-theme {
@@ -104,5 +105,13 @@ body.dark {
 
   .dark .text-primary {
     @apply text-indigo-200;
+  }
+
+  .rounded-close-btn {
+    @apply bg-stone-300/60;
+  }
+
+  .dark .rounded-close-btn {
+    @apply bg-stone-700/60;
   }
 }
