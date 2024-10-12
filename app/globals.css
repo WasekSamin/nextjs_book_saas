@@ -3,25 +3,106 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --light-primary: #ededed;
+  --dark-primary: #1c1b22;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+body.dark {
+  background-color: var(--dark-primary);
+  color: var(--light-primary);
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  body {
+    @apply text-sm;
+    min-height: 200svh;
+  }
+
+  .nav-layout,
+  .base-layout {
+    @apply px-5 md:px-10 lg:px-20;
+  }
+
+  .base-layout {
+    @apply py-20;
+  }
+
+  .bg-dark {
+    background-color: var(--dark-primary);
+  }
+
+  .bg-light {
+    background-color: var(--light-primary);
+  }
+
+  .text-light {
+    color: var(--light-primary);
+  }
+
+  .text-dark {
+    color: var(--dark-primary);
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100svh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .btn__spinner {
+    @apply animate-spin;
+  }
+
+  .page__spinner {
+    @apply animate-spin text-3xl sm:text-4xl; 
+  }
+
+  .page__spinner {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .custom__list ul li {
+    @apply list-disc ml-4 pb-1.5 last:pb-0;
+  }
+
+  .custom__list ol li {
+    @apply list-decimal ml-7 pb-1.5 last:pb-0;
+  }
+
+  .text-danger {
+    @apply text-rose-500;
+  }
+
+  .dark .text-danger {
+    @apply text-rose-300;
+  }
+
+  .theme-block {
+    @apply bg-light;
+  }
+
+  .dark .theme-block {
+    @apply bg-stone-800/60;
+  }
+
+  .border-theme {
+    @apply border-stone-300;
+  }
+
+  .dark .border-theme {
+    @apply border-stone-700;
+  }
+
+  .text-primary {
+    @apply text-indigo-500;
+  }
+
+  .dark .text-primary {
+    @apply text-indigo-200;
   }
 }
