@@ -1,4 +1,4 @@
-// import { create } from 'zustand'
+import { create } from 'zustand'
 // import { pb } from './pocketbase';
 
 // // Get user full details
@@ -30,37 +30,51 @@
 //     }
 // }
 
-// export const useUserStore = create((set) => ({
-//     user: null,
-//     updateUser: (user: any) => {
-//         set(() => ({
-//             user: user
-//         }))
-//     },
-//     isUserDataFetching: true,
-//     updateIsUserDataFetching: (isLoading: boolean) => {
-//         set(() => ({
-//             isUserDataFetching: isLoading
-//         }))
-//     },
+export const useUserStore = create((set) => ({
+    // User
+    user: null,
+    updateUser: (user: any) => {
+        set(() => ({
+            user: user
+        }))
+    },
+    isUserDataFetching: true,
+    updateIsUserDataFetching: (isLoading: boolean) => {
+        set(() => ({
+            isUserDataFetching: isLoading
+        }))
+    },
+    isUpdateProfilePic: false,
+    toggleIsUpdateProfilePic: (isUpdate: boolean) => {
+        set(() => ({
+            isUpdateProfilePic: isUpdate
+        }))
+    },
+    // getUserDetails: async () => {
+    //     const { user, profile } = await fetchUserDetails();
 
-//     userProfile: null,
-//     updateUserProfile: (profile: any) => {
-//         set(() => ({
-//             userProfile: profile
-//         }))
-//     },
-//     getUserDetails: async () => {
-//         const { user, profile } = await fetchUserDetails();
+    //     set(() => ({
+    //         user: user
+    //     }));
+    //     set(() => ({
+    //         userProfile: profile
+    //     }))
+    //     set(() => ({
+    //         isUserDataFetching: false
+    //     }));
+    // },
 
-//         set(() => ({
-//             user: user
-//         }));
-//         set(() => ({
-//             userProfile: profile
-//         }))
-//         set(() => ({
-//             isUserDataFetching: false
-//         }));
-//     },
-// }));
+    // Profile
+    userProfile: null,
+    updateUserProfile: (profile: any) => {
+        set(() => ({
+            userProfile: profile
+        }))
+    },
+    isUpdatePassword: false,
+    toggleIsUpdatePassword: (isUpdate: boolean) => {
+        set(() => ({
+            isUpdatePassword: isUpdate
+        }))
+    },
+}));

@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import { useThemeStore } from '@/store/ThemeStore';
 
 const NavProfile = () => {
-    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
     const showProfileModal = useNavStore((state: any) => state.showProfileModal);
     const updateShowProfileModal = useNavStore((state: any) => state.updateShowProfileModal);
 
@@ -49,7 +48,7 @@ const NavProfile = () => {
                         {
                             NAV_LINKS?.map((nav, index: number) => (
                                 <li key={index}>
-                                    <Link href="/" className="flex items-center gap-x-3 w-full hover:text-primary transition-colors duration-200 ease-linear">
+                                    <Link href={nav.url} className="flex items-center gap-x-3 w-full hover:text-primary transition-colors duration-200 ease-linear">
                                         {nav.icon} <span>{nav.title}</span>
                                     </Link>
                                 </li>

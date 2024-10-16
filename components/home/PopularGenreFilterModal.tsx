@@ -19,9 +19,7 @@ const PopularGenreFilterModal = () => {
     }
 
     const genreFilterModalClickListener = (e: any) => {
-        if (e.target.closest("#genre__filterBtn") ||
-            genreModalContentRef.current?.contains(e.target)
-        ) return;
+        if (genreModalContentRef.current?.contains(e.target)) return;
 
         updateShowGenreModal(false);
     }
@@ -47,7 +45,7 @@ const PopularGenreFilterModal = () => {
                         opacity: 0
                     }}
                     animate={{
-                        scale: "100%",
+                        scale: 1,
                         opacity: 1
                     }}
                     exit={{

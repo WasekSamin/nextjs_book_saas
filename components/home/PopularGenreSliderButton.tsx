@@ -15,13 +15,13 @@ const PopularGenreSliderButton = ({popularGenreSwiperRef, handleSlidePrevSlide, 
         <div className="w-full absolute top-0 z-10">
             {
                 showSliderButton.prevBtn &&
-                <button className="absolute left-[-5%] flex items-center justify-center p-1 bg-indigo-400 rounded-full" type="button" onClick={slideToPrev}>
+                <button className="absolute left-[-5%] flex items-center justify-center p-1 bg-indigo-500 hover:bg-indigo-600 text-light rounded-full transition-colors duration-200 ease-linear" type="button" onClick={slideToPrev}>
                     <FaChevronLeft />
                 </button>
             }
             {
                 showSliderButton.nextBtn &&
-                <button className="absolute right-0 flex items-center justify-center p-1 bg-indigo-400 rounded-full" type="button" onClick={slideToNext}>
+                <button className="absolute right-0 flex items-center justify-center p-1 bg-indigo-500 hover:bg-indigo-600 text-light rounded-full transition-colors duration-200 ease-linear" type="button" onClick={slideToNext}>
                     <FaChevronRight />
                 </button>
             }

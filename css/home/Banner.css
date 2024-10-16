@@ -1,0 +1,11 @@
+.banner__swipper .swiper-pagination {
+    position: relative;
+    margin-top: 45px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.banner__swipper .swiper-slide-prev,
+.banner__swipper .swiper-slide-next {
+    overflow-x: hidden;
+}

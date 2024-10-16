@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --light-primary: #ededed;
+  --light-primary: #F1EFEF;
   --dark-primary: #1c1b22;
+  --stone-800: rgb(41 37 36);
+  --indigo-500: rgb(99 102 241);
+  --stone-400: rgb(168 162 158);
 }
 
 body.dark {
@@ -15,7 +18,6 @@ body.dark {
 @layer utilities {
   body {
     @apply text-sm;
-    min-height: 200svh;
   }
 
   .nav-layout,
@@ -59,7 +61,7 @@ body.dark {
   }
 
   .page__spinner {
-    @apply animate-spin text-3xl sm:text-4xl; 
+    @apply animate-spin text-3xl sm:text-4xl;
   }
 
   .page__spinner {
@@ -107,11 +109,103 @@ body.dark {
     @apply text-indigo-200;
   }
 
+  .input__element,
   .rounded-close-btn {
-    @apply bg-stone-300/60;
+    @apply bg-stone-300/80;
   }
 
+  .dark .input__element,
   .dark .rounded-close-btn {
     @apply bg-stone-700/60;
   }
+
+  .input__element::placeholder {
+    @apply text-black/60;
+  }
+
+  .dark .input__element::placeholder {
+    @apply text-white/60;
+  }
+
+  .three-line-text {
+    display: -webkit-box;
+    /* Enables the use of -webkit-line-clamp */
+    -webkit-box-orient: vertical;
+    /* Specifies the box should be vertical */
+    -webkit-line-clamp: 3;
+    /* Limits the text to 2 lines */
+    overflow: hidden;
+    /* Hides the extra text */
+    text-overflow: ellipsis;
+    /* Adds an ellipsis (...) at the end of the visible text */
+  }
+
+  .dark .swiper-pagination-bullet:not(.swiper-pagination-bullet-active) {
+    @apply bg-light;
+  }
+
+  .custom__tooltip {
+    color: var(--dark-primary) !important;
+    background-color: var(--light-primary) !important;
+  }
+
+  .dark .custom__tooltip {
+    color: var(--light-primary) !important;
+    background-color: var(--stone-800) !important;
+  }
+}
+
+.react-datepicker {
+  background-color: var(--light-primary) !important;
+}
+
+.react-datepicker__header {
+  background-color: unset !important;
+}
+
+.react-datepicker__day:not([aria-disabled=true]):hover {
+  background-color: white !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--selected:not([aria-disabled=true]):hover,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--keyboard-selected:not([aria-disabled=true]):hover {
+  background-color: var(--indigo-500) !important;
+  color: white !important;
+}
+
+.dark .react-datepicker {
+  background-color: var(--dark-primary) !important;
+}
+
+.dark .react-datepicker * {
+  color: var(--light-primary) !important;
+}
+
+.dark .react-datepicker__day--disabled {
+  color: var(--stone-400) !important;
+}
+
+.dark .react-datepicker__day:not([aria-disabled=true]):hover {
+  background-color: var(--stone-800) !important;
+}
+
+.react-datepicker__triangle {
+  fill: var(--light-primary) !important;
+  color: var(--light-primary) !important;
+}
+
+.dark .react-datepicker__triangle {
+  fill: var(--dark-primary) !important;
+  color: var(--dark-primary) !important;
+}
+
+.react__fileUploader label[for="file"] {
+  min-width: unset !important;
+  max-width: unset !important;
+}
+
+.dark .react__fileUploader label[for="file"] * {
+  color: var(--light-primary) !important;
 }
