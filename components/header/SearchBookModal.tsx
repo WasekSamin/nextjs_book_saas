@@ -42,26 +42,22 @@ const SearchBookModal = () => {
   }
 
   const searchBookModalKeyUp = (e: any) => {
-    console.log(e.key);
     if (e.key === "Escape") updateShowBookSearchModal(false);
   }
 
   useEffect(() => {
-    console.log("BOOK SEARCH", showBookSearchModal);
-
     if (showBookSearchModal) {
       document.addEventListener("keyup", searchBookModalKeyUp);
-    }
 
-    return () => {
-      console.log("CLOSING");
-      showBookSearchModal && updateShowBookSearchModal(false);
-      document.removeEventListener("keyup", searchBookModalKeyUp);
+      setTimeout(() => {
+        searchBookInputRef.current?.focus();
+      }, 50)
     }
   }, [])
 
   const handleCloseSearchBookModal = () => {
     updateShowBookSearchModal(false);
+    document.removeEventListener("keyup", searchBookModalKeyUp);
   }
 
   return (
@@ -83,7 +79,7 @@ const SearchBookModal = () => {
         <div className="h-full">
           <div className="h-full flex flex-col gap-y-5">
             <div className="flex justify-end">
-              <button onClick={handleCloseSearchBookModal} type="button" className="flex items-center gap-x-1">
+              <button onClick={handleCloseSearchBookModal} type="button" className="flex items-center gap-x-1 text-danger">
                 <IoCloseCircleOutline />
                 Close
               </button>
@@ -100,15 +96,15 @@ const SearchBookModal = () => {
               {
                 BOOKS?.map(book => (
                   <div key={book.id} className="flex gap-x-5 pb-5 border-b border-theme last:pb-0 last:border-b-0">
-                    <Link href={`/book/${book.id}`}>
+                    <Link onClick={handleCloseSearchBookModal} href={`/book/${book.id}`}>
                       <Image src="/assets/images/no_img.jpg" width={100} height={150} className="min-w-[100px] min-h-[150px] object-cover" alt={`${book.title} Image`} />
                     </Link>
                     <div className="flex flex-col gap-y-3">
-                      <Link href={`/book/${book.id}`} className="w-fit text-base md:text-lg font-semibold">{book.title}</Link>
+                      <Link onClick={handleCloseSearchBookModal} href={`/book/${book.id}`} className="w-fit text-base md:text-lg font-semibold">{book.title}</Link>
                       <div className="flex flex-col gap-y-3">
                         {
                           book.author &&
-                          <Link href={`/author/${book.author.id}`} className="w-fit font-medium"><span className='font-normal'>By</span> {book.author.name}</Link>
+                          <Link onClick={handleCloseSearchBookModal} href={`/author/${book.author.id}`} className="w-fit font-medium"><span className='font-normal'>By</span> {book.author.name}</Link>
                         }
                         <div className='flex items-center gap-x-1 text-yellow-400 text-base'>
                           {
