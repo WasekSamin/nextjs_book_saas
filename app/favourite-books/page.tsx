@@ -25,7 +25,7 @@ const FavouriteBooks = () => {
                                 BOOKS?.map(book => (
                                     <div key={book.id} className="p-5 rounded-md border border-theme">
                                         <div className="flex flex-col lg:flex-row gap-5">
-                                            <Link href={`book/${book.id}`} className="translate-y-[-25%]">
+                                            <Link href={`/book/${book.id}`} className="translate-y-[-25%]">
                                                 <Image src={book.image} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
                                             </Link>
                                             <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 translate-y-[-40%] lg:translate-y-0">

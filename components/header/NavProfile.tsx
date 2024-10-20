@@ -5,6 +5,7 @@ import { IoIosLogOut } from 'react-icons/io';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useThemeStore } from '@/store/ThemeStore';
+import Image from 'next/image';
 
 const NavProfile = () => {
     const showProfileModal = useNavStore((state: any) => state.showProfileModal);
@@ -27,6 +28,7 @@ const NavProfile = () => {
     return (
         <div className="relative" id="profile__modalRef">
             <Avatar name="Wasek Samin" round={true} size="35px" className='cursor-pointer' onClick={() => toggleProfileModal(!showProfileModal)} />
+            {/* <Image onClick={() => toggleProfileModal(!showProfileModal)} src="/assets/images/no_img.jpg" width={35} height={35} className='min-w-[35px] min-h-[35px] rounded-full object-cover cursor-pointer' alt="Wasek Samin Image" /> */}
 
             <AnimatePresence mode='wait' initial={false}>
                 {

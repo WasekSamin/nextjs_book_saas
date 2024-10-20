@@ -10,7 +10,6 @@ const DesktopNavbar = () => {
   const navSearchRef = useRef<HTMLDivElement | null>(null);
   const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
   const toggleDarkMode = useThemeStore((state: any) => state.toggleDarkMode);
-  const showBookSearchModal = useNavStore((state: any) => state.showBookSearchModal);
   const updateShowBookSearchModal = useNavStore((state: any) => state.updateShowBookSearchModal);
 
   const searchNavOnFocus = (e: any) => {

@@ -6,19 +6,21 @@ import { BOOKS } from '@/data'
 import { RichTextElement } from '@/utils/RichTextElement'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import React from 'react'
 import { FaRegHeart, FaRegStar, FaStar } from 'react-icons/fa'
 import { Tooltip } from 'react-tooltip'
 
-const PurchasedBooks = () => {
+const GenreWiseBook = () => {
+    const { id: genreId } = useParams();
+
     return (
         <>
             <Navbar />
 
             <div className="base-layout container mx-auto">
                 <div className='flex flex-col gap-y-5'>
-                    <h5 className='font-semibold text-xl md:text-2xl'>Purchased Books</h5>
-
+                    <h5 className='font-semibold text-xl md:text-2xl'>Genre Title</h5>
                     <div className='mt-20'>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-20">
                             {
@@ -30,8 +32,8 @@ const PurchasedBooks = () => {
                                             </Link>
                                             <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 translate-y-[-40%] lg:translate-y-0">
                                                 <div className="lg:w-full flex justify-end order-2 lg:order-1">
-                                                    <FaRegHeart data-tooltip-id={`purchased__book-${book.id}`} data-tooltip-content="Add to favorite" className="text-danger text-lg cursor-pointer" />
-                                                    <Tooltip id={`purchased__book-${book.id}`} className="custom__tooltip" />
+                                                    <FaRegHeart data-tooltip-id={`genre__book-${book.id}`} data-tooltip-content="Add to favorite" className="text-danger text-lg cursor-pointer" />
+                                                    <Tooltip id={`genre__book-${book.id}`} className="custom__tooltip" />
                                                 </div>
 
                                                 <div className="flex flex-col gap-y-5 order-1 lg:order-2">
@@ -78,4 +80,4 @@ const PurchasedBooks = () => {
     )
 }
 
-export default PurchasedBooks
+export default GenreWiseBook

@@ -2,8 +2,10 @@ import { useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import { MdOutlineRocketLaunch } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
+import { ImSpinner9 } from "react-icons/im";
 
 const RequestBookForm = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [publishedDate, setPublishedDate] = useState<Date | null>(null);
 
     const bookFormRef = useRef<HTMLFormElement | null>(null);
@@ -13,6 +15,8 @@ const RequestBookForm = () => {
 
     const handleBookFormSubmit = async (e: any) => {
         e.preventDefault();
+
+        setIsSubmitting(true);
     }
 
     return (
@@ -32,9 +36,13 @@ const RequestBookForm = () => {
             />
 
             <div>
-                <button type="submit" className='flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light bg-indigo-500 hover:bg-indigo-600 transition-colors duration-200 ease-linear'>
+                <button disabled={isSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
                     Send
-                    <MdOutlineRocketLaunch />
+                    {
+                        isSubmitting ?
+                            <ImSpinner9 className="btn__spinner" /> :
+                            <MdOutlineRocketLaunch />
+                    }
                 </button>
             </div>
         </form>

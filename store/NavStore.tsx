@@ -6,17 +6,17 @@ export const NAV_LINKS = [
     {
         title: "Favourite Books",
         icon: <FaRegHeart />,
-        url: "/favourite-books"
+        url: "/favourite-books",
     },
     {
         title: "Purchased Books",
         icon: <IoBookOutline />,
-        url: "/purchased-books"
+        url: "/purchased-books",
     },
     {
         title: "Profile",
         icon: <FaRegUser />,
-        url: "/profile"
+        url: "/profile",
     }
 ]
 
@@ -38,5 +38,5 @@ export const useNavStore = create((set) => ({
         set(() => ({
             showBookSearchModal: showModal
         }))
-    },
+    }
 }));

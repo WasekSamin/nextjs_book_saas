@@ -4,10 +4,11 @@ import Link from "next/link";
 import { IoIosLogOut } from "react-icons/io";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: any) => {
+    const pathname = usePathname();
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
-    const updateShowMobileNavSidebar = useNavStore((state: any) => state.updateShowMobileNavSidebar);
 
     const mobileNavSidebarRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,7 +55,7 @@ const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: an
                         {
                             NAV_LINKS?.map((nav, index: number) => (
                                 <li key={index} className="px-5">
-                                    <Link href="/" className="flex items-center gap-x-3 w-full hover:text-primary transition-colors duration-200 ease-linear">
+                                    <Link href={nav.url} className={`flex items-center gap-x-3 w-full ${nav.url === pathname ? "text-primary" : "hover:text-primary"}  transition-colors duration-200 ease-linear`}>
                                         {nav.icon} <span>{nav.title}</span>
                                     </Link>
                                 </li>

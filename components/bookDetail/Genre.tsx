@@ -8,7 +8,7 @@ const Genre = () => {
             <div className="flex flex-wrap gap-3">
                 {
                     GENRES?.map(genre => (
-                        <Link href={`/author/${genre.id}`} className="whitespace-nowrap text-center flex-1 border border-theme px-5 py-1.5 rounded-full hover:bg-indigo-500 hover:text-light transition-colors duration-200 ease-linear">
+                        <Link key={genre.id} href={`/genre/${genre.id}`} className="whitespace-nowrap text-center flex-1 border border-theme px-5 py-1.5 rounded-full hover:bg-indigo-500 hover:text-light transition-colors duration-200 ease-linear">
                             {genre.title}
                         </Link>
                     ))

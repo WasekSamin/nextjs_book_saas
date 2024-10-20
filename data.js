@@ -167,3 +167,53 @@ export const GENRES = [
         "title": "Humor"
     }
 ]
+
+const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const getRandomBoolean = () => Math.random() < 0.5;
+
+const USERS = [
+    { id: 1, name: "Wasek Samin" },
+    { id: 2, name: "Alice Johnson" },
+    { id: 3, name: "John Doe" },
+    { id: 4, name: "Jane Smith" },
+    { id: 5, name: "Michael Brown" }
+];
+
+const generateRandomReviewMessage = () => {
+    const messages = [
+        "lorem ipsum",
+        "Great book! Highly recommended.",
+        "Not what I expected.",
+        "A masterpiece, truly!",
+        "Quite an interesting read."
+    ];
+    return messages[getRandomNumber(0, messages.length - 1)];
+};
+
+const generateRandomReviews = () => {
+    let REVIEWS = [];
+    
+    for (let i = 0; i < 20; i++) {
+        const randomUser = USERS[getRandomNumber(0, USERS.length - 1)];
+        const randomBook = BOOKS[getRandomNumber(0, BOOKS.length - 1)];
+        
+        REVIEWS.push({
+            id: i+1,
+            user: {
+                id: randomUser.id,
+                name: randomUser.name
+            },
+            book: {
+                id: randomBook.id,
+                title: randomBook.title
+            },
+            review_message: generateRandomReviewMessage(),
+            rating: getRandomRating(),
+            is_hidden: getRandomBoolean()
+        });
+    }
+
+    return REVIEWS;
+};
+
+export const REVIEWS = generateRandomReviews();

@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion";
 import { IoLockOpenOutline } from "react-icons/io5";
 import { useUserStore } from "@/store/UserStore";
 import { FiEdit } from "react-icons/fi";
+import { ImSpinner9 } from "react-icons/im";
 
 const ProfileForm = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const isUpdatePassword = useUserStore((state: any) => state.isUpdatePassword);
     const toggleIsUpdatePassword = useUserStore((state: any) => state.toggleIsUpdatePassword);
 
@@ -24,9 +26,15 @@ const ProfileForm = () => {
         }
     }
 
+    const handleProfileUpdate = async (e: any) => {
+        e.preventDefault();
+
+        setIsSubmitting(true);
+    }
+
     return (
         <div className="w-full">
-            <form className="flex flex-col gap-y-5 p-5 theme-block rounded-md">
+            <form onSubmit={handleProfileUpdate} className="flex flex-col gap-y-5 p-5 theme-block rounded-md">
                 <h5 className='font-semibold text-xl md:text-2xl'>Profile</h5>
 
                 <input autoFocus={true} ref={usernameRef} id="name" name="name" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Full Name" type="text" />
@@ -47,7 +55,7 @@ const ProfileForm = () => {
                 <AnimatePresence>
                     {
                         isUpdatePassword &&
-                        <motion.div 
+                        <motion.div
                             initial={{
                                 opacity: 0,
                                 translateY: "-50px"
@@ -60,7 +68,7 @@ const ProfileForm = () => {
                                 opacity: 0,
                                 translateY: "-50px"
                             }}
-                        className="flex flex-col gap-y-3">
+                            className="flex flex-col gap-y-3">
                             <input ref={passwordRef} id="password" name="password" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Password" type="password" />
                             <input ref={confirmPasswordRef} id="conf__password" name="conf__password" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Confirm Password" type="password" />
                         </motion.div>
@@ -68,8 +76,12 @@ const ProfileForm = () => {
                 </AnimatePresence>
 
                 <div className="mt-1">
-                    <button type="submit" className='flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light bg-indigo-500 hover:bg-indigo-600 transition-colors duration-200 ease-linear'>
-                        <FiEdit />
+                    <button disabled={isSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
+                        {
+                            isSubmitting ?
+                                <ImSpinner9 className="btn__spinner" /> :
+                                <FiEdit />
+                        }
                         Update Profile
                     </button>
                 </div>

@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from "react"
 import DesktopNavbar from "./DesktopNavbar";
 import { useThemeStore } from "@/store/ThemeStore";
 import MobileNavbar from "./MobileNavbar";
+import { useNavStore } from "@/store/NavStore";
+import { AnimatePresence } from "framer-motion";
+import SearchBookModal from "./SearchBookModal";
 
 const Navbar = () => {
   const [showMobileNavbar, setShowMobileNavbar] = useState(true);
   const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+  const showBookSearchModal = useNavStore((state: any) => state.showBookSearchModal)
 
   const navRef = useRef<HTMLElement | null>(null);
 
@@ -45,6 +49,13 @@ const Navbar = () => {
             <DesktopNavbar />
         }
       </div>
+
+      <AnimatePresence initial={false} mode="wait">
+        {
+          showBookSearchModal && 
+          <SearchBookModal />
+        }
+      </AnimatePresence>
     </nav>
   )
 }
