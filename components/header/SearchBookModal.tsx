@@ -48,6 +48,7 @@ const SearchBookModal = () => {
   useEffect(() => {
     if (showBookSearchModal) {
       document.addEventListener("keyup", searchBookModalKeyUp);
+      document.body.classList.add("overflow-y-hidden");
 
       setTimeout(() => {
         searchBookInputRef.current?.focus();
@@ -58,6 +59,7 @@ const SearchBookModal = () => {
   const handleCloseSearchBookModal = () => {
     updateShowBookSearchModal(false);
     document.removeEventListener("keyup", searchBookModalKeyUp);
+    document.body.classList.remove("overflow-y-hidden");
   }
 
   return (

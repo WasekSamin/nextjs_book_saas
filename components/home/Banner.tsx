@@ -51,12 +51,12 @@ const book = () => {
                 {
                     BOOKS.slice(0, 20)?.map(book => (
                         <SwiperSlide key={book.id}>
-                            <div className='flex items-center gap-x-5'>
+                            <div className='flex flex-col min-[450px]:flex-row items-center gap-x-5 gap-y-5'>
                                 <Link href={`/book/${book.id}`}>
                                     <Image src={book.image} width={180} height={260} className='min-w-[180px] min-h-[260px] object-cover' alt={`${book.title} Image`} />
                                 </Link>
-                                <div className='flex flex-col gap-y-3'>
-                                    <h5 className='font-semibold text-base md:text-lg'>{book.title}</h5>
+                                <div className='flex flex-col gap-y-3 items-center min-[450px]:items-start text-center min-[450px]:text-left'>
+                                    <Link href={`/book/${book.id}`} className='font-semibold text-base md:text-lg'>{book.title}</Link>
                                     <div className='custom__list three-line-text'>
                                         <RichTextElement content={book.description} />
                                     </div>
@@ -77,8 +77,8 @@ const book = () => {
                                             book.rating >= 5 ? <FaStar /> : <FaRegStar />
                                         }
                                     </div>
-                                    <div className='mt-3'>
-                                        <Link href={`/book/${book.id}`} className='whitespace-nowrap px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-light rounded-full transition-colors duration-200 ease-linear'>View Book</Link>
+                                    <div className='mt-3 w-full min-[450px]:w-fit'>
+                                        <Link href={`/book/${book.id}`} className='flex items-center justify-center whitespace-nowrap px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-light rounded-full transition-colors duration-200 ease-linear'>View Book</Link>
                                     </div>
                                 </div>
                             </div>

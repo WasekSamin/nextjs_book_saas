@@ -6,7 +6,7 @@ import { FileUploader } from "react-drag-drop-files";
 import Image from "next/image";
 import { FiEdit } from "react-icons/fi";
 
-const _profilePicFileTypes = ["JPG", "PNG", "SVG"];
+const PROFILE_PIC_FILE_TYPES = ["JPG", "PNG", "SVG"];
 
 const ProfilePicUploadModal = () => {
     const [profilePicFile, setProfilePicFile] = useState<File | "">("");
@@ -27,10 +27,12 @@ const ProfilePicUploadModal = () => {
     useEffect(() => {
         if (isUpdateProfilePic) {
             document.addEventListener("click", updateProfilePicModalClickListener);
+            document.body.classList.add("overflow-y-hidden");
         }
 
         return () => {
             document.removeEventListener("click", updateProfilePicModalClickListener);
+            document.body.classList.remove("overflow-y-hidden");
         }
     }, [isUpdateProfilePic])
 
@@ -78,7 +80,7 @@ const ProfilePicUploadModal = () => {
 
                     <div className="flex flex-col gap-y-3">
                         <div className="react__fileUploader">
-                            <FileUploader handleChange={handleProfilePicChange} name="file" types={_profilePicFileTypes}
+                            <FileUploader handleChange={handleProfilePicChange} name="file" types={PROFILE_PIC_FILE_TYPES}
                                 className="w-full"
                             />
                         </div>

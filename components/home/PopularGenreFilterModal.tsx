@@ -27,10 +27,12 @@ const PopularGenreFilterModal = () => {
     useEffect(() => {
         if (showGenreModal) {
             document.addEventListener("click", genreFilterModalClickListener);
+            document.body.classList.add("overflow-y-hidden");
         }
 
         return () => {
             document.removeEventListener("click", genreFilterModalClickListener);
+            document.body.classList.remove("overflow-y-hidden");
         }
     }, [showGenreModal])
 
