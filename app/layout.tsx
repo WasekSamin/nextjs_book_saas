@@ -7,6 +7,12 @@ import { useEffect } from "react";
 
 import 'react-toastify/dist/ReactToastify.css';
 import { useThemeStore } from "@/store/ThemeStore";
+import { ToastContainer } from "react-toastify";
+import { useUserStore } from "@/store/UserStore";
+import { pb } from "@/store/PocketbaseStore";
+import { usePageStore } from "@/store/PageStore";
+import { usePathname, useRouter } from "next/navigation";
+import { ImSpinner } from "react-icons/im";
 
 export const nunito = Nunito({
   weight: ['400', '500', '600'], // Define the weights you need
@@ -19,18 +25,21 @@ export const nunito = Nunito({
 //   description: "Wasek Samin, A full-stack developer",
 // };
 
+// Pathnames that do not need checking
+const PATHNAMES_NO_CHECK = [
+  "/login",
+  "/help"
+]
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const getUserDetails = useUserStore((state: any) => state.getUserDetails);
-
-  // useEffect(() => {
-  //   getUserDetails();
-  // }, [])
-
+  const pathname = usePathname();
+  const router = useRouter();
   const toggleDarkMode = useThemeStore((state: any) => state.toggleDarkMode);
+  const updateIsPageLoading = usePageStore((state: any) => state.updateIsPageLoading);
 
   useEffect(() => {
     const theme = localStorage.getItem("theme");
@@ -47,6 +56,20 @@ export default function RootLayout({
     }
   }, [])
 
+  useEffect(() => {
+    if (!PATHNAMES_NO_CHECK.includes(pathname)) {
+      if (pb?.authStore?.model) {
+        updateIsPageLoading(false);
+      } else {
+        router.push("/login");
+      }
+    }
+
+    return () => {
+      updateIsPageLoading(true);
+    }
+  }, [pathname])
+
   return (
     <html lang="en">
       <head>
@@ -57,6 +80,7 @@ export default function RootLayout({
       <body
         className={`tracking-wider leading-6 ${nunito.className}`}
       >
+        <ToastContainer />
         {children}
       </body>
     </html>

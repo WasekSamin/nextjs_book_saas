@@ -56,6 +56,10 @@ body.dark {
     z-index: 1000;
   }
 
+  .content__spinner {
+    @apply animate-spin text-xl;
+  }
+
   .btn__spinner {
     @apply animate-spin;
   }
@@ -208,4 +212,8 @@ body.dark {
 
 .dark .react__fileUploader label[for="file"] * {
   color: var(--light-primary) !important;
+}
+
+.react__fileUploader input {
+  width: 100% !important;
 }

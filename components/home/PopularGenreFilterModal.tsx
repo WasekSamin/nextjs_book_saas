@@ -1,19 +1,30 @@
-import { POP_GENRES } from "@/data";
-import { useGenreStore } from "@/store/GenreStore";
+import { GENRE_TYPE, useGenreStore } from "@/store/GenreStore";
+import { pb } from "@/store/PocketbaseStore";
+import { useThemeStore } from "@/store/ThemeStore";
+import { makeToast } from "@/utils/toastMesage";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { IoClose } from "react-icons/io5";
+import GenreModalSearch from "./GenreModalSearch";
 
 
 const PopularGenreFilterModal = () => {
+    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
     const activeTab = useGenreStore((state: any) => state.activeTab);
     const updateActiveTab = useGenreStore((state: any) => state.updateActiveTab);
     const showGenreModal = useGenreStore((state: any) => state.showGenreModal);
     const updateShowGenreModal = useGenreStore((state: any) => state.updateShowGenreModal);
 
+    const genres = useGenreStore((state: any) => state.genres);
+    const addGenres = useGenreStore((state: any) => state.addGenres);
+    const reRenderGenre = useGenreStore((state: any) => state.reRenderGenre);
+    const updateReRenderGenre = useGenreStore((state: any) => state.updateReRenderGenre);
+    const emptyGenres = useGenreStore((state: any) => state.emptyGenres);
+
+    
     const genreModalContentRef = useRef<HTMLDivElement | null>(null);
 
-    const handleSelectPopularGenre = (tab: number) => {
+    const handleSelectPopularGenre = (tab: string) => {
         updateActiveTab(tab);
         updateShowGenreModal(false);
     }
@@ -35,6 +46,34 @@ const PopularGenreFilterModal = () => {
             document.body.classList.remove("overflow-y-hidden");
         }
     }, [showGenreModal])
+
+    const fetchAllGenres = async () => {
+        try {
+            const genreRecords = await pb.collection('genres').getFullList();
+
+            genreRecords?.map(genre => {
+                addGenres(genre);
+            });
+
+            updateReRenderGenre(false);
+        } catch (err) {
+            makeToast({
+                toastType: "error",
+                msg: "Failed to fetch genres!",
+                isDark: isDarkMode
+            });
+            updateReRenderGenre(true);
+            emptyGenres();
+        }
+    }
+
+    useEffect(() => {
+        if (reRenderGenre) {
+            fetchAllGenres();
+        }
+    }, [])
+
+    
 
     return (
         <div className="fixed w-full h-svh top-0 left-0 z-[1003]">
@@ -68,16 +107,20 @@ const PopularGenreFilterModal = () => {
                             </div>
                         </div>
 
+                        <div className="my-3">
+                            <GenreModalSearch />
+                        </div>
+
                         <div className="pt-3 flex flex-col gap-y-3 w-full h-full overflow-x-hidden overflow-y-auto">
-                            <div onClick={() => handleSelectPopularGenre(-1)} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
+                            <div onClick={() => handleSelectPopularGenre("")} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
                                 <p className="font-medium">All</p>
                                 {
-                                    activeTab === -1 &&
+                                    activeTab === "" &&
                                     <p className="py-1 px-2 rounded-full bg-indigo-500 text-light text-xs">Selected</p>
                                 }
                             </div>
                             {
-                                POP_GENRES?.map(genre => (
+                                genres?.map((genre: GENRE_TYPE) => (
                                     <div key={genre.id} onClick={() => handleSelectPopularGenre(genre.id)} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
                                         <p className="font-medium">{genre.title}</p>
                                         {

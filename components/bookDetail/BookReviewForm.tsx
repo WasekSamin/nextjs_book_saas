@@ -71,7 +71,7 @@ const BookReviewForm = () => {
         }
     }
 
-    // When a star is hovered
+    // When a star is hovered/released
     const handleRatingMouseAction = ({ rating, hover }: RATING_ON_MOUSE_ACTION) => {
         if (hover) {
             // If hovered on star, then the current hovered and the stars situated on the left side will all get filled
@@ -188,7 +188,7 @@ const BookReviewForm = () => {
                     }
                 </div>
 
-                <textarea onChange={handleFormInputChange} rows={3} ref={reviewMessageRef} id="message" name="message" className="focus:outline-none px-3 py-2 rounded-md input__element opacity-60 placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Your review"></textarea>
+                <textarea onChange={handleFormInputChange} rows={3} ref={reviewMessageRef} id="message" name="message" className="focus:outline-none px-3 py-2 rounded-md input__element focus:ring-2 focus:ring-indigo-400" placeholder="Your review"></textarea>
 
                 <div>
                     <button disabled={isSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>

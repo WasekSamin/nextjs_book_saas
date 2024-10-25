@@ -1,8 +1,15 @@
 import { create } from 'zustand'
 
+export type GENRE_TYPE = {
+    id: string,
+    title: string,
+    created: DateTime,
+    updated: DateTime
+}
+
 export const useGenreStore = create((set) => ({
-    activeTab: -1,
-    updateActiveTab: (tab: number) => {
+    activeTab: "",
+    updateActiveTab: (tab: string) => {
         set(() => ({
             activeTab: tab
         }))
@@ -13,7 +20,42 @@ export const useGenreStore = create((set) => ({
         set(() => ({
             showGenreModal: showModal
         }))
-    }
+    },
     // Only for mobile ends
 
+    reRenderGenre: true,
+    updateReRenderGenre: (reRender: boolean) => {
+        set(() => ({
+            reRenderGenre: reRender
+        }))
+    },
+    isFetchingGenre: true,
+    updateIsFetchingGenre: (isFetching: boolean) => {
+        set(() => ({
+            isFetchingGenre: isFetching
+        }))
+    },
+    genres: [],
+    addGenres: (genre: any) => {
+        set((state: any) => ({
+            genres: [...state.genres, genre]
+        }))
+    },
+    emptyGenres: () => {
+        set(() => ({
+            genres: []
+        }))
+    },
+
+    searchedGenres: [],
+    addSearchedGenres: (genre: any) => {
+        set((state: any) => ({
+            searchedGenres: [...state.searchedGenres, genre]
+        }))
+    },
+    emptySearchedGenres: () => {
+        set(() => ({
+            searchedGenres: []
+        }))
+    }
 }));

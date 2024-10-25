@@ -6,10 +6,16 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useThemeStore } from '@/store/ThemeStore';
 import Image from 'next/image';
+import { logout } from '@/utils/authLogout';
+import { useRouter } from 'next/navigation';
+import { usePageStore } from '@/store/PageStore';
+import { pb } from '@/store/PocketbaseStore';
 
 const NavProfile = () => {
+    const router = useRouter();
     const showProfileModal = useNavStore((state: any) => state.showProfileModal);
     const updateShowProfileModal = useNavStore((state: any) => state.updateShowProfileModal);
+    const updateIsPageLoading = usePageStore((state: any) => state.updateIsPageLoading);
 
     const toggleProfileModal = (showModal: boolean) => {
         updateShowProfileModal(showModal);
@@ -25,10 +31,19 @@ const NavProfile = () => {
         window.addEventListener("click", profileModalListener)
     }, [])
 
+    const handleLogout = () => {
+        logout();
+        updateIsPageLoading(true);
+        router.push("/login");
+    }
+
     return (
         <div className="relative" id="profile__modalRef">
-            <Avatar name="Wasek Samin" round={true} size="35px" className='cursor-pointer' onClick={() => toggleProfileModal(!showProfileModal)} />
-            {/* <Image onClick={() => toggleProfileModal(!showProfileModal)} src="/assets/images/no_img.jpg" width={35} height={35} className='min-w-[35px] min-h-[35px] rounded-full object-cover cursor-pointer' alt="Wasek Samin Image" /> */}
+            {
+                pb?.authStore?.model?.avatar ?
+                    <Image onClick={() => toggleProfileModal(!showProfileModal)} src={pb.files.getUrl(pb?.authStore?.model, pb?.authStore?.model?.avatar, {'thumb': '35x35'})} width={35} height={35} className='min-w-[35px] min-h-[35px] rounded-full object-cover cursor-pointer' alt="Wasek Samin Image" /> :
+                    <Avatar name={pb?.authStore?.model?.name} round={true} size="35px" className='cursor-pointer' onClick={() => toggleProfileModal(!showProfileModal)} />
+            }
 
             <AnimatePresence mode='wait' initial={false}>
                 {
@@ -57,7 +72,7 @@ const NavProfile = () => {
                             ))
                         }
                         <li>
-                            <button type='button' className="flex items-center gap-x-3 w-full hover:text-danger transition-colors duration-200 ease-linear">
+                            <button onClick={handleLogout} type='button' className="flex items-center gap-x-3 w-full hover:text-danger transition-colors duration-200 ease-linear">
                                 <IoIosLogOut /> <span>Logout</span>
                             </button>
                         </li>

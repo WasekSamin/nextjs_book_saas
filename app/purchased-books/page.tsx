@@ -1,6 +1,6 @@
 "use client";
 
-import Footer from '@/components/Footer'
+import Footer from '@/components/footer/Footer'
 import Navbar from '@/components/header/Navbar'
 import { BOOKS } from '@/data'
 import { RichTextElement } from '@/utils/RichTextElement'

@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/header/Navbar"
-import Footer from "@/components/Footer"
+import Footer from "@/components/footer/Footer"
 import "@/css/profile/Profile.css";
 import ProfileForm from "@/components/profile/ProfileForm";
 import ProfilePicUploadModal from "@/components/profile/ProfilePicUploadModal";

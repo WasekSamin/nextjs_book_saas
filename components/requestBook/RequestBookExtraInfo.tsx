@@ -2,11 +2,11 @@ import Link from "next/link"
 import { FaPhone } from "react-icons/fa"
 import { MdAlternateEmail } from "react-icons/md"
 
-const RequestBookExtraInfo = () => {
+const RequestBookExtraInfo = ({msg}: {msg: string}) => {
     return (
         <div className='flex flex-col gap-y-5'>
             <h5 className='text-xl font-semibold text-center sm:text-left'>OR</h5>
-            <p>Simply send your book request to the whatsapp/email address.</p>
+            <p>{msg}</p>
 
             <div className='flex flex-col gap-y-3'>
                 <div className='flex items-center gap-x-5'>
