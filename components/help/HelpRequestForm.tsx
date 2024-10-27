@@ -6,6 +6,7 @@ import { pb } from "@/store/PocketbaseStore";
 import { makeToast } from "@/utils/toastMesage";
 import { useThemeStore } from "@/store/ThemeStore";
 import { useHelpRequestStore } from "@/store/HelpRequestStore";
+import { HANDLE_FORM_ERROR } from "@/utils/formError";
 
 const HelpRequestForm = () => {
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
@@ -100,7 +101,7 @@ const HelpRequestForm = () => {
         helpFormRef.current?.reset();
     }
 
-    const handleFormError = ({ name, isError }: { name: string, isError: boolean }) => {
+    const handleFormError = ({ name, isError }: HANDLE_FORM_ERROR) => {
         switch (name) {
             case "name":
                 if (nameRef.current) {

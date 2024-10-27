@@ -44,6 +44,13 @@ export const useUserStore = create((set) => ({
             isUpdateProfilePic: isUpdate
         }))
     },
+    isProfilePicSubmitting: false,
+    updateIsProfilePicSubmitting: (isSubmit: boolean) => {
+        set(() => ({
+            isProfilePicSubmitting: isSubmit
+        }))
+    },
+
     getUserDetails: async () => {
         const { user } = await fetchUserDetails();
 
@@ -58,17 +65,10 @@ export const useUserStore = create((set) => ({
         // }));
     },
 
-    // Profile
-    userProfile: null,
-    updateUserProfile: (profile: any) => {
+    isUserSubmitting: false,
+    updateIsUserSubmitting: (isSubmit: boolean) => {
         set(() => ({
-            userProfile: profile
-        }))
-    },
-    isUpdatePassword: false,
-    toggleIsUpdatePassword: (isUpdate: boolean) => {
-        set(() => ({
-            isUpdatePassword: isUpdate
+            isUserSubmitting: isSubmit
         }))
     },
 }));

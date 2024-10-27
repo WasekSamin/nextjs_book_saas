@@ -5,16 +5,39 @@ import { useEffect, useRef, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import Image from "next/image";
 import { FiEdit } from "react-icons/fi";
+import { ImSpinner9 } from "react-icons/im";
+import FormErrorElement from "../FormErrorElement";
+import { HANDLE_FORM_ERROR } from "@/utils/formError";
+import { pb } from "@/store/PocketbaseStore";
+import { makeToast } from "@/utils/toastMesage";
+import { useThemeStore } from "@/store/ThemeStore";
 
 const PROFILE_PIC_FILE_TYPES = ["JPG", "PNG", "SVG"];
 
+
 const ProfilePicUploadModal = () => {
     const [profilePicFile, setProfilePicFile] = useState<File | "">("");
+    const [formError, setFormError] = useState({
+        errorId: -1,
+        errorMsg: ""
+    });
 
     const profilePicModalRef = useRef<HTMLDivElement | null>(null);
 
+    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+    const isProfilePicSubmitting = useUserStore((state: any) => state.isProfilePicSubmitting);
+    const updateIsProfilePicSubmitting = useUserStore((state: any) => state.updateIsProfilePicSubmitting);
     const isUpdateProfilePic = useUserStore((state: any) => state.isUpdateProfilePic);
     const toggleIsUpdateProfilePic = useUserStore((state: any) => state.toggleIsUpdateProfilePic);
+
+    const handleFormError = ({ errId, errMsg }: HANDLE_FORM_ERROR) => {
+        if (errId === 1 && errMsg) {
+            setFormError({
+                errorId: 1,
+                errorMsg: errMsg
+            });
+        }
+    }
 
     const updateProfilePicModalClickListener = (e: any) => {
         if (profilePicModalRef.current?.contains(e.target) ||
@@ -45,8 +68,46 @@ const ProfilePicUploadModal = () => {
         setProfilePicFile(file);
     };
 
-    const handleUpdateProfilePic = async() => {
-        
+    const handleUpdateProfilePic = async () => {
+        updateIsProfilePicSubmitting(true);
+
+        if (!profilePicFile) {
+            handleFormError({ errId: 1, errMsg: "Please upload a profile pic!" });
+            updateIsProfilePicSubmitting(false);
+            return;
+        }
+
+        await addProfilePic({
+            profilePic: profilePicFile
+        });
+    }
+
+    const addProfilePic = async ({ profilePic }: { profilePic: File | "" }) => {
+        const formData = {
+            avatar: profilePic
+        }
+
+        try {
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
+
+            if (userRecord) {
+                makeToast({
+                    toastType: "success",
+                    msg: "Profile pic uploaded successfully.",
+                    isDark: isDarkMode
+                });
+                
+                updateIsProfilePicSubmitting(false);
+                toggleIsUpdateProfilePic(false);
+            }
+        } catch (err) {
+            makeToast({
+                toastType: "error",
+                msg: "Failed to upload profile pic!",
+                isDark: isDarkMode
+            });
+            updateIsProfilePicSubmitting(false);
+        }
     }
 
     return (
@@ -79,10 +140,16 @@ const ProfilePicUploadModal = () => {
                     </div>
 
                     <div className="flex flex-col gap-y-3">
-                        <div className="react__fileUploader">
-                            <FileUploader handleChange={handleProfilePicChange} name="file" types={PROFILE_PIC_FILE_TYPES}
-                                className="w-full"
-                            />
+                        <div className="flex flex-col gap-y-1.5">
+                            <div className="react__fileUploader">
+                                <FileUploader handleChange={handleProfilePicChange} name="file" types={PROFILE_PIC_FILE_TYPES}
+                                    className="w-full"
+                                />
+                            </div>
+                            {
+                                (formError.errorId === 1 && formError.errorMsg) &&
+                                <FormErrorElement errorMsg={formError.errorMsg} />
+                            }
                         </div>
 
                         <AnimatePresence initial={false} mode="wait">
@@ -109,7 +176,11 @@ const ProfilePicUploadModal = () => {
                                     </motion.div>
 
                                     <button type='button' onClick={handleUpdateProfilePic} className='px-3 py-2 rounded-md flex items-center justify-center gap-x-1.5 bg-teal-500 hover:bg-teal-600 transition-colors duration-200 ease-linear'>
-                                        <FiEdit />
+                                        {
+                                            isProfilePicSubmitting ?
+                                                <ImSpinner9 className="btn__spinner" /> :
+                                                <FiEdit />
+                                        }
                                         Update Pic
                                     </button>
                                 </div>

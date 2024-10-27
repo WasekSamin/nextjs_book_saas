@@ -5,6 +5,7 @@ import { MdOutlineRocketLaunch } from "react-icons/md";
 import FormErrorElement from "../FormErrorElement";
 import { ImSpinner9 } from "react-icons/im";
 import FormSubmitButton from "../FormSubmitButton";
+import { HANDLE_FORM_ERROR } from "@/utils/formError";
 
 type RATING_ON_MOUSE_ACTION = {
     rating: number,
@@ -21,13 +22,6 @@ const DEFAULT_BOOK_RATING_OPTIONS = {
 type FORM_ERROR_TYPE = {
     errorId: number,
     errorMsg: string
-}
-
-type HANDLE_FORM_ERROR = {
-    errId?: number,
-    errMsg?: string | undefined,
-    name?: string,
-    isError?: boolean
 }
 
 const BookReviewForm = () => {

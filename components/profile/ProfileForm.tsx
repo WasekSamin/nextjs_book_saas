@@ -6,30 +6,98 @@ import { IoLockOpenOutline } from "react-icons/io5";
 import { useUserStore } from "@/store/UserStore";
 import { FiEdit } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
+import { FaLinkedin } from "react-icons/fa";
+import { pb } from "@/store/PocketbaseStore";
+import { HANDLE_FORM_ERROR } from "@/utils/formError";
+import { makeToast } from "@/utils/toastMesage";
 
 const ProfileForm = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const isUpdatePassword = useUserStore((state: any) => state.isUpdatePassword);
-    const toggleIsUpdatePassword = useUserStore((state: any) => state.toggleIsUpdatePassword);
+    const isDarkMode = useUserStore((state: any) => state.isDarkMode);
+    const isUserSubmitting = useUserStore((state: any) => state.isUserSubmitting);
+    const updateIsUserSubmitting = useUserStore((state: any) => state.updateIsUserSubmitting);
 
-    const usernameRef = useRef<HTMLInputElement | null>(null);
-    const passwordRef = useRef<HTMLInputElement | null>(null);
-    const confirmPasswordRef = useRef<HTMLInputElement | null>(null);
-
-    const handleTogglePassword = () => {
-        toggleIsUpdatePassword(!isUpdatePassword);
-
-        if (!isUpdatePassword) {
-            setTimeout(() => {
-                passwordRef.current?.focus();
-            }, 50);
-        }
-    }
+    const nameRef = useRef<HTMLInputElement | null>(null);
 
     const handleProfileUpdate = async (e: any) => {
         e.preventDefault();
 
-        setIsSubmitting(true);
+        updateIsUserSubmitting(true);
+
+        const name = nameRef.current?.value?.trim() ?? "";
+
+        if (name === "") {
+            handleFormError({name: "name", isError: true});
+            updateIsUserSubmitting(false);
+            return;
+        }
+
+        await editUser({
+            name: name,
+        });
+    }
+
+    const editUser = async ({name}: {name: string}) => {
+        const formData = {
+            name: name
+        }
+
+        try {
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
+
+            if (userRecord) {
+                makeToast({
+                    toastType: "success",
+                    msg: "User profile updated successfully.",
+                    isDark: isDarkMode
+                });
+                updateIsUserSubmitting(false);
+            }
+        } catch(err) {
+            makeToast({
+                toastType: "error",
+                msg: "Failed to update the profile!",
+                isDark: isDarkMode
+            });
+            updateIsUserSubmitting(false);
+        }
+    }
+
+    const handleFormError = ({name, isError}: HANDLE_FORM_ERROR) => {
+        switch (name) {
+            case "name":
+                if (nameRef.current) {
+                    if (isError) {
+                        nameRef.current.classList.remove("focus:ring-2", "focus:ring-indigo-400");
+                        nameRef.current.classList.add("ring-2", "ring-rose-400");
+                    } else {
+                        nameRef.current.classList.remove("ring-2", "ring-rose-400");
+                        nameRef.current.classList.add("focus:ring-2", "focus:ring-indigo-400");
+                    }
+                }
+                break;
+            default:
+                if (nameRef.current) {
+                    nameRef.current.classList.remove("ring-2", "ring-rose-400");
+                    nameRef.current.classList.add("focus:ring-2", "focus:ring-indigo-400");
+                }
+        }
+    }
+
+    const handleFormInputChange = (e: any) => {
+        const fieldName = e.target.name;
+        const fieldValue = e.target.value.trim();
+
+        if (fieldValue === "") {
+            handleFormError({
+                name: fieldName,
+                isError: true
+            });
+        } else {
+            handleFormError({
+                name: fieldName,
+                isError: false
+            });
+        }
     }
 
     return (
@@ -37,48 +105,13 @@ const ProfileForm = () => {
             <form onSubmit={handleProfileUpdate} className="flex flex-col gap-y-5 p-5 theme-block rounded-md">
                 <h5 className='font-semibold text-xl md:text-2xl'>Profile</h5>
 
-                <input autoFocus={true} ref={usernameRef} id="name" name="name" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Full Name" type="text" />
-                <input id="email" name="email" className="focus:outline-none px-3 py-2 rounded-md input__element opacity-60 placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Email address" type="email" readOnly disabled />
-                <div className="flex justify-end">
-                    <button onClick={handleTogglePassword} type="button" className={`flex items-center justify-center gap-x-1.5 px-3 py-2 rounded-md ${isUpdatePassword ? "bg-rose-500 hover:bg-rose-600" : "bg-teal-500 hover:bg-teal-600"} transition-colors duration-200 ease-linear`}>
-                        {
-                            isUpdatePassword ?
-                                <>
-                                    <IoLockOpenOutline className="text-base" /> <span>Cancel Update</span>
-                                </> :
-                                <>
-                                    <IoLockOpenOutline className="text-base" /> <span>Update Password</span>
-                                </>
-                        }
-                    </button>
-                </div>
-                <AnimatePresence>
-                    {
-                        isUpdatePassword &&
-                        <motion.div
-                            initial={{
-                                opacity: 0,
-                                translateY: "-50px"
-                            }}
-                            animate={{
-                                opacity: 1,
-                                translateY: 0
-                            }}
-                            exit={{
-                                opacity: 0,
-                                translateY: "-50px"
-                            }}
-                            className="flex flex-col gap-y-3">
-                            <input ref={passwordRef} id="password" name="password" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Password" type="password" />
-                            <input ref={confirmPasswordRef} id="conf__password" name="conf__password" className="focus:outline-none px-3 py-2 rounded-md input__element placeholder: focus:ring-2 focus:ring-indigo-400" placeholder="Confirm Password" type="password" />
-                        </motion.div>
-                    }
-                </AnimatePresence>
+                <input autoFocus={true} defaultValue={pb?.authStore?.model?.name} ref={nameRef} id="name" name="name" onChange={handleFormInputChange} className="focus:outline-none px-3 py-2 rounded-md input__element focus:ring-2 focus:ring-indigo-400" placeholder="Full Name" type="text" />
+                <input defaultValue={pb?.authStore?.model?.email} id="email" name="email" className="focus:outline-none px-3 py-2 rounded-md input__element opacity-60 focus:ring-2 focus:ring-indigo-400" placeholder="Email address" type="email" readOnly disabled />
 
-                <div className="mt-1">
-                    <button disabled={isSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
+                <div>
+                    <button disabled={isUserSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isUserSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
                         {
-                            isSubmitting ?
+                            isUserSubmitting ?
                                 <ImSpinner9 className="btn__spinner" /> :
                                 <FiEdit />
                         }

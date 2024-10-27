@@ -11,6 +11,7 @@ import { useBookStore } from "@/store/BookStore";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { IoClose } from "react-icons/io5";
+import { HANDLE_FORM_ERROR } from "@/utils/formError";
 
 const REQUEST_BOOK_THUMBNAIL_FILE_TYPES = ["JPG", "PNG", "SVG"];
 
@@ -111,7 +112,7 @@ const RequestBookForm = () => {
         setBookThumbnail(file);
     }
 
-    const handleFormError = ({ name, isError }: { name: string, isError: boolean }) => {
+    const handleFormError = ({ name, isError }: HANDLE_FORM_ERROR) => {
         switch (name) {
             case "title":
                 if (titleRef.current) {

@@ -9,9 +9,19 @@ import { useUserStore } from "@/store/UserStore";
 import { AnimatePresence } from "framer-motion";
 import ProfileFavouriteBooks from "@/components/profile/ProfileFavouriteBooks";
 import ProfileImage from "@/components/profile/ProfileImage";
+import { useEffect } from "react";
 
 const Profile = () => {
     const isUpdateProfilePic = useUserStore((state: any) => state.isUpdateProfilePic);
+    const toggleIsUpdateProfilePic = useUserStore((state: any) => state.toggleIsUpdateProfilePic);
+    const updateIsUserSubmitting = useUserStore((state: any) => state.updateIsUserSubmitting);
+
+    useEffect(() => {
+        return () => {
+            updateIsUserSubmitting(false);
+            toggleIsUpdateProfilePic(false);
+        }
+    }, [])
 
     return (
         <>

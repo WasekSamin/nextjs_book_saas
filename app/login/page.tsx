@@ -43,6 +43,8 @@ const Login = () => {
             case "google":
                 const googleAuthData = await pb.collection('users').authWithOAuth2({ provider: 'google' });
 
+                console.log(googleAuthData);
+
                 if (googleAuthData) {
                     updateUserInfo(googleAuthData);
                 }
@@ -59,18 +61,31 @@ const Login = () => {
     }
 
     const updateUserInfo = async (authData: any) => {
-        const { name, avatarUrl } = authData.meta;
+        const { avatar: userRecordAvatar, name: userRecordName }: { avatar: string, name: string } = authData.record;
+        const { name, avatarUrl }: { name: string, avatarUrl: string } = authData.meta;
         const { id } = authData.record;
 
         let avatarFileObj: File | null | undefined = null;
 
-        if (avatarUrl && typeof avatarUrl === "string") {
+        if (!userRecordAvatar && avatarUrl && typeof avatarUrl === "string") {
             avatarFileObj = await convertUrlToFile({ fileUrl: avatarUrl });
         }
 
-        const formData = {
+        type FORM_DATA_TYPE = {
+            name?: string, 
+            avatar: File | null | undefined | string
+        }
+
+        let formData: FORM_DATA_TYPE = {
             name: name,
-            avatar: avatarFileObj ?? ""
+            avatar: avatarFileObj ? avatarFileObj : ""
+        }
+
+        if (userRecordName) {
+            delete formData.name;
+        }
+        if (userRecordAvatar) {
+            delete formData.avatar;
         }
 
         try {

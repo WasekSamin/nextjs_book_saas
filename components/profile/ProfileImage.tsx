@@ -1,6 +1,8 @@
+import { pb } from '@/store/PocketbaseStore';
 import { useUserStore } from '@/store/UserStore';
 import Image from 'next/image'
 import React from 'react'
+import Avatar from 'react-avatar';
 import { FiUpload } from 'react-icons/fi';
 import { Tooltip } from 'react-tooltip'
 
@@ -10,7 +12,11 @@ const ProfileImage = () => {
     return (
         <div className='flex flex-col gap-y-5'>
             <div onClick={() => toggleIsUpdateProfilePic(true)} data-tooltip-id="profile__picMainEl" data-tooltip-content="Upload profile pic" data-tooltip-place="bottom" className="mx-auto sm:mx-0 w-[80px] h-[80px] min-w-[80px] min-h-[80px] rounded-full cursor-pointer hover:opacity-70 transition-opacity duration-200 ease-linear">
-                <Image src="/assets/images/no_img.jpg" width={80} height={80} className="w-full h-full rounded-full object-cover" alt="User Profile Image" />
+                {
+                    pb?.authStore?.model?.avatar ? 
+                    <Image src={pb.files.getUrl(pb.authStore.model, pb.authStore.model.avatar, {'thumb': '80x80'})} width={80} height={80} className="w-full h-full rounded-full object-cover" alt="User Profile Image" />
+                    : <Avatar name={pb?.authStore?.model?.name} round={true} size="80px" />
+                }
             </div>
             <Tooltip id="profile__picMainEl" className="custom__tooltip" />
 

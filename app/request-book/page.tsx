@@ -9,7 +9,6 @@ import { ImSpinner } from 'react-icons/im';
 
 const RequestBook = () => {
     const isPageLoading = usePageStore((state: any) => state.isPageLoading);
-    const updateIsPageLoading = usePageStore((state: any) => state.updateIsPageLoading);
 
     return (
         isPageLoading ?

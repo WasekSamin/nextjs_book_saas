@@ -1,11 +1,52 @@
 import { BOOKS } from "@/data"
+import { useBookStore } from "@/store/BookStore";
+import { pb } from "@/store/PocketbaseStore";
+import { useThemeStore } from "@/store/ThemeStore";
 import { RichTextElement } from "@/utils/RichTextElement";
+import { makeToast } from "@/utils/toastMesage";
 import Image from "next/image"
 import Link from "next/link";
+import { useEffect } from "react";
 import { FaRegHeart, FaRegStar, FaStar } from "react-icons/fa"
 import { Tooltip } from 'react-tooltip';
 
+const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
+
 const PopularGenreBooks = () => {
+    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+    const popGenreBooks = useBookStore((state: any) => state.popGenreBooks);
+    const addPopGenreBook = useBookStore((state: any) => state.addPopGenreBook);
+    const reRenderPopGenreBooks = useBookStore((state: any) => state.reRenderPopGenreBooks);
+    const updateReRenderPopGenreBooks = useBookStore((state: any) => state.updateReRenderPopGenreBooks);
+    const isPopGenreBookDataFetching = useBookStore((state: any) => state.isPopGenreBookDataFetching);
+    const updateIsPopGenreBookDataFetching = useBookStore((state: any) => state.updateIsPopGenreBookDataFetching);
+    const popGenreBookPage = useBookStore((state: any) => state.popGenreBookPage);
+    const updatePopGenreBookPage = useBookStore((state: any) => state.updatePopGenreBookPage);
+
+    const fetchBooks = async(page: number) => {
+        try {
+            const bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
+                sort: "-created",
+            });
+
+            console.log(bookList)
+        } catch(err) {
+            console.log(err);
+            makeToast({
+                toastType: "error",
+                msg: "Failed to fetch popular genre books!",
+                isDark: isDarkMode
+            });
+            updateReRenderPopGenreBooks(true);
+        }
+    }
+
+    useEffect(() => {
+        if (reRenderPopGenreBooks) {
+            fetchBooks(popGenreBookPage);
+        }
+    }, [])
+
     return (
         <div className="mt-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-20">
