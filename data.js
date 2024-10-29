@@ -75,7 +75,7 @@ function generateRandomData(count) {
             author: getRandomAuthor(),
             description: getRandomDescription(),
             rating: getRandomRating(),
-            image: "/assets/images/no_img.jpg"
+            thumbnail: "/assets/images/no_img.jpg"
         });
     }
 

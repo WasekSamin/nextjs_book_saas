@@ -12,7 +12,6 @@ import { usePageStore } from '@/store/PageStore';
 import { pb } from '@/store/PocketbaseStore';
 
 const NavProfile = () => {
-    const router = useRouter();
     const showProfileModal = useNavStore((state: any) => state.showProfileModal);
     const updateShowProfileModal = useNavStore((state: any) => state.updateShowProfileModal);
     const updateIsPageLoading = usePageStore((state: any) => state.updateIsPageLoading);
@@ -34,7 +33,7 @@ const NavProfile = () => {
     const handleLogout = () => {
         logout();
         updateIsPageLoading(true);
-        router.push("/login");
+        window.location.href = "/login";
     }
 
     return (

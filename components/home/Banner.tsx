@@ -11,7 +11,6 @@ import 'swiper/css/scrollbar';
 import 'swiper/css/autoplay';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
-import { BOOKS } from '@/data';
 import Link from 'next/link';
 import { RichTextElement } from '@/utils/RichTextElement';
 
@@ -24,7 +23,7 @@ import { useBookStore } from '@/store/BookStore';
 import { pb } from '@/store/PocketbaseStore';
 import { ImSpinner } from 'react-icons/im';
 
-const book = () => {
+const Banner = () => {
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
     const bannerBooks = useBookStore((state: any) => state.bannerBooks);
     const addBannerBook = useBookStore((state: any) => state.addBannerBook);
@@ -108,7 +107,7 @@ const book = () => {
                                         </Link>
                                     }
                                     <div className='flex flex-col gap-y-3 items-center min-[450px]:items-start text-center min-[450px]:text-left'>
-                                        <Link href={`/book/${book.id}`} className='font-semibold text-base md:text-lg'>{book.title}</Link>
+                                        <Link href={`/book/${book.id}`} className='font-semibold text-base md:text-lg three-line-text'>{book.title}</Link>
                                         <div className='custom__list three-line-text'>
                                             <RichTextElement content={book.description} />
                                         </div>
@@ -142,4 +141,4 @@ const book = () => {
     )
 }
 
-export default book
+export default Banner

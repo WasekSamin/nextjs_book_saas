@@ -1,12 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion";
-import { IoLockOpenOutline } from "react-icons/io5";
+import { useRef } from "react"
 import { useUserStore } from "@/store/UserStore";
 import { FiEdit } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
-import { FaLinkedin } from "react-icons/fa";
 import { pb } from "@/store/PocketbaseStore";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
 import { makeToast } from "@/utils/toastMesage";

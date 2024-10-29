@@ -90,7 +90,7 @@ const Login = () => {
 
         try {
             await pb.collection('users').update(id, formData);
-            router.push("/");
+            window.location.href = "/";
         } catch (err) {
             makeToast({
                 toastType: "error",
