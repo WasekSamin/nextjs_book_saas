@@ -1,31 +1,34 @@
-import { GENRE_TYPE, useGenreStore } from "@/store/GenreStore";
-import { pb } from "@/store/PocketbaseStore";
-import { useThemeStore } from "@/store/ThemeStore";
-import { makeToast } from "@/utils/toastMesage";
+import { fetchAllGenres, useGenreStore } from "@/store/GenreStore";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import GenreModalSearch from "./GenreModalSearch";
+import { useBookStore } from "@/store/BookStore";
+import { RecordModel } from "pocketbase";
+import { ImSpinner } from "react-icons/im";
 
 
 const PopularGenreFilterModal = () => {
-    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
-    const activeTab = useGenreStore((state: any) => state.activeTab);
-    const updateActiveTab = useGenreStore((state: any) => state.updateActiveTab);
+    // Genre store
+    const activeGenre = useGenreStore((state: any) => state.activeGenre);
+    const updateActiveGenre = useGenreStore((state: any) => state.updateActiveGenre);
     const showGenreModal = useGenreStore((state: any) => state.showGenreModal);
     const updateShowGenreModal = useGenreStore((state: any) => state.updateShowGenreModal);
-
     const genres = useGenreStore((state: any) => state.genres);
     const addGenres = useGenreStore((state: any) => state.addGenres);
     const reRenderGenre = useGenreStore((state: any) => state.reRenderGenre);
     const updateReRenderGenre = useGenreStore((state: any) => state.updateReRenderGenre);
-    const emptyGenres = useGenreStore((state: any) => state.emptyGenres);
+    const isFetchingGenre = useGenreStore((state: any) => state.isFetchingGenre);
+    const updateIsFetchingGenre = useGenreStore((state: any) => state.updateIsFetchingGenre);
 
-    
+    // Book store
+    const emptyPopGenreBooks = useBookStore((state: any) => state.emptyPopGenreBooks);
+
     const genreModalContentRef = useRef<HTMLDivElement | null>(null);
 
     const handleSelectPopularGenre = (tab: string) => {
-        updateActiveTab(tab);
+        updateActiveGenre(tab);
+        emptyPopGenreBooks();
         updateShowGenreModal(false);
     }
 
@@ -47,33 +50,22 @@ const PopularGenreFilterModal = () => {
         }
     }, [showGenreModal])
 
-    const fetchAllGenres = async () => {
-        try {
-            const genreRecords = await pb.collection('genres').getFullList();
+    const getAllGenres = async () => {
+        const genres: RecordModel[] = await fetchAllGenres({ searchText: "" });
 
-            genreRecords?.map(genre => {
-                addGenres(genre);
-            });
+        genres?.map((genre: RecordModel) => {
+            addGenres(genre);
+        });
 
-            updateReRenderGenre(false);
-        } catch (err) {
-            makeToast({
-                toastType: "error",
-                msg: "Failed to fetch genres!",
-                isDark: isDarkMode
-            });
-            updateReRenderGenre(true);
-            emptyGenres();
-        }
+        updateIsFetchingGenre(false);
+        updateReRenderGenre(false);
     }
 
     useEffect(() => {
         if (reRenderGenre) {
-            fetchAllGenres();
+            getAllGenres();
         }
     }, [])
-
-    
 
     return (
         <div className="fixed w-full h-svh top-0 left-0 z-[1003]">
@@ -111,26 +103,32 @@ const PopularGenreFilterModal = () => {
                             <GenreModalSearch />
                         </div>
 
-                        <div className="pt-3 flex flex-col gap-y-3 w-full h-full overflow-x-hidden overflow-y-auto">
-                            <div onClick={() => handleSelectPopularGenre("")} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
-                                <p className="font-medium">All</p>
-                                {
-                                    activeTab === "" &&
-                                    <p className="py-1 px-2 rounded-full bg-indigo-500 text-light text-xs">Selected</p>
-                                }
-                            </div>
-                            {
-                                genres?.map((genre: GENRE_TYPE) => (
-                                    <div key={genre.id} onClick={() => handleSelectPopularGenre(genre.id)} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
-                                        <p className="font-medium">{genre.title}</p>
+                        {
+                            isFetchingGenre ?
+                                <div className="mx-auto">
+                                    <ImSpinner className="content__spinner" />
+                                </div> :
+                                <div className="pt-3 flex flex-col gap-y-3 w-full h-full overflow-x-hidden overflow-y-auto">
+                                    <div onClick={() => handleSelectPopularGenre("")} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
+                                        <p className="font-medium">All</p>
                                         {
-                                            activeTab === genre.id &&
+                                            activeGenre === "" &&
                                             <p className="py-1 px-2 rounded-full bg-indigo-500 text-light text-xs">Selected</p>
                                         }
                                     </div>
-                                ))
-                            }
-                        </div>
+                                    {
+                                        genres?.map((genre: RecordModel) => (
+                                            <div key={genre.id} onClick={() => handleSelectPopularGenre(genre.id)} className="flex items-center justify-between gap-x-5 cursor-pointer border-b border-theme pb-3 last:pb-0 last:border-b-0">
+                                                <p className="font-medium">{genre.title}</p>
+                                                {
+                                                    activeGenre === genre.id &&
+                                                    <p className="py-1 px-2 rounded-full bg-indigo-500 text-light text-xs">Selected</p>
+                                                }
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                        }
                     </div>
                 </motion.div>
             </div>

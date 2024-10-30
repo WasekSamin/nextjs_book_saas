@@ -11,11 +11,10 @@ import 'swiper/css/scrollbar';
 import 'swiper/css/autoplay';
 
 import PopularGenreSliderButton from "./PopularGenreSliderButton";
-import { GENRE_TYPE, useGenreStore } from "@/store/GenreStore";
-import { makeToast } from "@/utils/toastMesage";
-import { useThemeStore } from "@/store/ThemeStore";
-import { pb } from "@/store/PocketbaseStore";
+import { fetchAllGenres, useGenreStore } from "@/store/GenreStore";
 import { ImSpinner } from "react-icons/im";
+import { useBookStore } from "@/store/BookStore";
+import { RecordModel } from "pocketbase";
 
 const PopularGenreSlider = () => {
     const popularGenreSwiperRef = useRef<any>(null);
@@ -24,39 +23,32 @@ const PopularGenreSlider = () => {
         nextBtn: true
     });
 
-    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
-    const activeTab = useGenreStore((state: any) => state.activeTab);
-    const updateActiveTab = useGenreStore((state: any) => state.updateActiveTab);
+    // Book store
+    const emptyPopGenreBooks = useBookStore((state: any) => state.emptyPopGenreBooks);
 
+    // Genre store
+    const activeGenre = useGenreStore((state: any) => state.activeGenre);
+    const updateActiveGenre = useGenreStore((state: any) => state.updateActiveGenre);
     const reRenderGenre = useGenreStore((state: any) => state.reRenderGenre);
     const updateReRenderGenre = useGenreStore((state: any) => state.updateReRenderGenre);
     const genres = useGenreStore((state: any) => state.genres);
     const addGenres = useGenreStore((state: any) => state.addGenres);
-    const emptyGenres = useGenreStore((state: any) => state.emptyGenres);
 
-    const fetchAllGenres = async () => {
-        try {
-            const genreRecords = await pb.collection('genres').getFullList();
+    const [currentTab, setCurrentTab] = useState(activeGenre);
 
-            genreRecords?.map(genre => {
-                addGenres(genre);
-            });
+    const getAllGenres = async () => {
+        const genres: RecordModel[] = await fetchAllGenres({searchText: ""});
 
-            updateReRenderGenre(false);
-        } catch (err) {
-            makeToast({
-                toastType: "error",
-                msg: "Failed to fetch genres!",
-                isDark: isDarkMode
-            });
-            updateReRenderGenre(true);
-            emptyGenres();
-        }
+        genres?.map((genre: RecordModel) => {
+            addGenres(genre);
+        });
+
+        updateReRenderGenre(false);
     }
 
     useEffect(() => {
         if (reRenderGenre) {
-            fetchAllGenres();
+            getAllGenres();
         }
     }, [])
 
@@ -105,7 +97,12 @@ const PopularGenreSlider = () => {
     }
 
     const handleSelectPopularGenre = (tab: string) => {
-        updateActiveTab(tab);
+        if (currentTab === tab) return;
+
+        updateActiveGenre(tab);
+        setCurrentTab(tab);
+
+        emptyPopGenreBooks();
     }
 
     return (
@@ -131,14 +128,14 @@ const PopularGenreSlider = () => {
                 >
                     <SwiperSlide>
                         <div className="w-full">
-                            <p title={genres.title} onClick={() => handleSelectPopularGenre("")} className={`w-fit max-w-[150px] text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer ${activeTab === "" ? "border-b-2 border-indigo-400" : ""}`}>All</p>
+                            <p title={genres.title} onClick={() => handleSelectPopularGenre("")} className={`w-fit max-w-[150px] text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer ${activeGenre === "" ? "border-b-2 border-indigo-400" : ""}`}>All</p>
                         </div>
                     </SwiperSlide>
                     {
-                        genres.map((genre: GENRE_TYPE) => (
+                        genres.map((genre: RecordModel) => (
                             <SwiperSlide key={genre.id}>
                                 <div className="w-full">
-                                    <p title={genre.title} onClick={() => handleSelectPopularGenre(genre.id)} className={`w-fit max-w-[150px] text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer ${activeTab === genre.id ? "border-b-2 border-indigo-400" : ""}`}>{genre.title}</p>
+                                    <p title={genre.title} onClick={() => handleSelectPopularGenre(genre.id)} className={`w-fit max-w-[150px] text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer ${activeGenre === genre.id ? "border-b-2 border-indigo-400" : ""}`}>{genre.title}</p>
                                 </div>
                             </SwiperSlide>
                         ))

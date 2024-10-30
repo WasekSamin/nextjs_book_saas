@@ -1,5 +1,6 @@
 import { pb } from "@/store/PocketbaseStore";
 import { makeToast } from "./toastMesage";
+import { RecordModel } from "pocketbase";
 
 // Check if the book is favourite or not
 export const isFavouriteBook = async (bookId: string) => {
@@ -64,4 +65,17 @@ export const isDeletedFavouriteBook = async(bookId: string) => {
     }
 
     return isDeleted;
+}
+
+// Update/Remove book from favourite book list
+export const updateBookFavouriteMode = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
+    book.is_favourite = isFav;
+
+    if (isFav) {
+        await addToFavouriteBookList(book.id);
+    } else {
+        await isDeletedFavouriteBook(book.id);
+    }
+
+    return book;
 }

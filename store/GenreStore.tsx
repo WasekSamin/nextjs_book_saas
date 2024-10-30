@@ -1,24 +1,39 @@
+import { RecordModel } from 'pocketbase';
 import { create } from 'zustand'
+import { pb } from './PocketbaseStore';
 
-export type GENRE_TYPE = {
-    id: string,
-    title: string,
-    created: DateTime,
-    updated: DateTime
+// Fetch all the genres
+export const fetchAllGenres = async ({searchText}: {searchText: string}) => {
+    try {
+        const genreRecords = await pb.collection('genres').getFullList({
+            filter: `title~"${searchText}"`
+        });
+
+        return genreRecords;
+    } catch (err) {
+        return [];
+    }
 }
 
 export const useGenreStore = create((set) => ({
-    activeTab: "",
-    updateActiveTab: (tab: string) => {
+    activeGenre: "",
+    updateActiveGenre: (tab: string) => {
         set(() => ({
-            activeTab: tab
+            activeGenre: tab
         }))
     },
+    
     // Only for mobile starts
     showGenreModal: false,
     updateShowGenreModal: (showModal: boolean) => {
         set(() => ({
             showGenreModal: showModal
+        }))
+    },
+    searchGenreText: "",
+    updateSearchGenreText: (searchText: string) => {
+        set(() => ({
+            searchGenreText: searchText
         }))
     },
     // Only for mobile ends
@@ -36,7 +51,7 @@ export const useGenreStore = create((set) => ({
         }))
     },
     genres: [],
-    addGenres: (genre: any) => {
+    addGenres: (genre: RecordModel) => {
         set((state: any) => ({
             genres: [...state.genres, genre]
         }))
@@ -48,7 +63,7 @@ export const useGenreStore = create((set) => ({
     },
 
     searchedGenres: [],
-    addSearchedGenres: (genre: any) => {
+    addSearchedGenres: (genre: RecordModel) => {
         set((state: any) => ({
             searchedGenres: [...state.searchedGenres, genre]
         }))
