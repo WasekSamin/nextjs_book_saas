@@ -13,6 +13,7 @@ import { searchBooks, useBookStore } from "@/store/BookStore";
 import { RecordModel } from "pocketbase";
 import { pb } from "@/store/PocketbaseStore";
 import { ImSpinner } from "react-icons/im";
+import { useInView } from "react-intersection-observer";
 
 const SearchBookModal = () => {
   // Theme store
@@ -32,6 +33,14 @@ const SearchBookModal = () => {
   const emptySearchedBooks = useBookStore((state: any) => state.emptySearchedBooks);
   const searchedBookPage = useBookStore((state: any) => state.searchedBookPage);
   const updateSearchedBookPage = useBookStore((state: any) => state.updateSearchedBookPage);
+  const isSearchedBookLoading = useBookStore((state: any) => state.isSearchedBookLoading);
+  const updateIsSearchedBookLoading = useBookStore((state: any) => state.updateIsSearchedBookLoading);
+
+  const { ref: searchedBookRef, inView: searchedBookInView, entry: searchedBookEntry } = useInView({
+    /* Optional options */
+    triggerOnce: true,
+    threshold: 0,
+  });
 
   const searchBookFormRef = useRef<HTMLFormElement | null>(null);
   const searchBookInputRef = useRef<HTMLInputElement | null>(null);
@@ -56,48 +65,48 @@ const SearchBookModal = () => {
 
   const bookSearch = async (page: number) => {
     updateIsSearchedBooksFetching(true);
-    emptySearchedBooks();
 
     const searchText = searchBookInputRef.current?.value?.trim() ?? "";
     updateSearchBookText(searchText);
 
     const { items: books }: any = await searchBooks({ page: page, searchText: searchText });
 
-    if (books?.length > 0) {
-      books?.map((book: RecordModel) => {
-        const { authors }: any = book?.expand;
-  
-        if (authors) {
-          book.authors = authors;
-        }
-  
-        addSearchedBooks(book);
-      });
-    } else {
-      emptySearchedBooks();
-    }
+    books?.map((book: RecordModel) => {
+      const { authors }: any = book?.expand;
+
+      if (authors) {
+        book.authors = authors;
+      }
+
+      addSearchedBooks(book);
+    });
 
     updateIsSearchedBooksFetching(false);
+    updateSearchedBookPage(page);
   }
 
   const handleSearchBook = async (e: any) => {
     e.preventDefault();
 
-    await bookSearch(searchedBookPage);
+    emptySearchedBooks();
+    await bookSearch(1);
+    updateIsSearchedBookLoading(false);
   }
 
   // Debounce callback
   const searchBookDebounce = useDebouncedCallback(
     // function
     async (value) => {
-      bookSearch(searchedBookPage);
+      emptySearchedBooks();
+      await bookSearch(1);
+      updateIsSearchedBookLoading(false);
     },
     // delay in ms
     1000
   );
 
   const searchBookModalKeyUp = (e: any) => {
-    if (e.key === "Escape") updateShowBookSearchModal(false);
+    if (e.key === "Escape") handleCloseSearchBookModal();
   }
 
   useEffect(() => {
@@ -120,6 +129,14 @@ const SearchBookModal = () => {
   const handleSearchBookText = (e: any) => {
     searchBookDebounce(e.target.value);
   }
+
+  const loadSearchedBookInView = async () => {
+    bookSearch(searchedBookPage + 1);
+  }
+
+  useEffect(() => {
+    searchedBookInView && loadSearchedBookInView();
+  }, [searchedBookInView])
 
   return (
     <motion.div
@@ -155,11 +172,11 @@ const SearchBookModal = () => {
 
             <div className="pt-5 h-full overflow-x-hidden overflow-y-auto flex flex-col gap-y-5">
               {
-                isSearchedBooksFetching ?
+                isSearchedBookLoading ?
                   <div className="w-full flex items-center justify-center">
                     <ImSpinner className="page__spinner" />
                   </div> :
-                  searchedBooks?.map((book: RecordModel) => (
+                  searchedBooks?.map((book: RecordModel, index: number) => (
                     <div key={book.id} className="flex gap-x-5 pb-5 border-b border-theme last:pb-0 last:border-b-0">
                       <Link onClick={handleCloseSearchBookModal} href={`/book/${book.id}`}>
                         <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '100x150' })} width={100} height={150} className="min-w-[100px] min-h-[150px] object-cover" alt={`${book.title} Image`} />
@@ -199,10 +216,22 @@ const SearchBookModal = () => {
                           </div>
                         </div>
                       </div>
+
+                      {
+                        index === searchedBooks.length - 1 &&
+                        <div ref={searchedBookRef} className="invisible opacity-0 z-[-1]"></div>
+                      }
                     </div>
                   ))
               }
             </div>
+
+            {
+              isSearchedBooksFetching &&
+              <div className="mt-5 w-full flex items-center justify-center">
+                <ImSpinner className="page__spinner" />
+              </div>
+            }
           </div>
         </div>
       </div>

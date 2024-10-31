@@ -17,8 +17,6 @@ export const fetchBooks = async({page, genreId}: {page: number, genreId?: string
                 sort: "-created",
                 expand: "authors"
             });
-
-            console.log("BOOK LIST", bookList);
         } else {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `genres~"${genreId}"`,
@@ -40,7 +38,7 @@ export const searchBooks = async({page, searchText}: {page: number, searchText: 
 
     try {
         const bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
-            filter: `id~"${searchText}" || title~"${searchText}" || authors_title~"${searchText}"`,
+            filter: `id~"${searchText}" || title~"${searchText}"`,
             expand: "authors",
             sort: "-created"
         });
@@ -81,7 +79,13 @@ export const useBookStore = create((set) => ({
     },
 
     // Search books
-    isSearchedBooksFetching: true,
+    isSearchedBookLoading: false,
+    updateIsSearchedBookLoading: (isSearching: boolean) => {
+        set(() => ({
+            isSearchedBookLoading: isSearching
+        }))
+    },
+    isSearchedBooksFetching: false,
     updateIsSearchedBooksFetching: (isFetching: boolean) => {
         set(() => ({
             isSearchedBooksFetching: isFetching
@@ -107,7 +111,8 @@ export const useBookStore = create((set) => ({
     },
     emptySearchedBooks: () => {
         set(() => ({
-            searchedBooks: []
+            searchedBooks: [],
+            searchedBookPage: 1,
         }))
     },
 
