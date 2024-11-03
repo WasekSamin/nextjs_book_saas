@@ -39,15 +39,18 @@ export const useReviewStore = create((set) => ({
         }))
     },
     bookReviews: [],
+    bookReviewIds: new Set(),
     addBookReview: (review: RecordModel) => {
         set((state: any) => ({
-            bookReviews: [...state.bookReviews, review]
+            bookReviews: [...state.bookReviews, review],
+            bookReviewIds: new Set([...state.bookReviewIds, review.id])
         }))
     },
+    // When new comment/review is submitted, just push it to the top
     addNewBookReview: (review: RecordModel) => {
-        console.log("NEW REVIEW", review);
         set((state: any) => ({
-            bookReviews: [review, ...state.bookReviews]
+            bookReviews: [review, ...state.bookReviews],
+            bookReviewIds: new Set([...state.bookReviewIds, review.id])
         }))
     },
     updateBookReview: (review: RecordModel) => {
@@ -58,6 +61,7 @@ export const useReviewStore = create((set) => ({
     emptyBookReview: () => {
         set(() => ({
             bookReviews: [],
+            bookReviewIds: new Set(),
             bookReviewPage: 1,
             reRenderBookReview: true
         }))

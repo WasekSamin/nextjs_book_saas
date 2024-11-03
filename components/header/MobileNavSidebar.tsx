@@ -64,7 +64,7 @@ const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: an
                     </div>
 
                     <li className="px-5">
-                        <button type="button" className="px-3 py-2 bg-rose-500 rounded-md flex items-center gap-x-3 w-full text-hover:primary transition-colors duration-200 ease-linear">
+                        <button type="button" className="px-3 py-2 bg-rose-500 text-white rounded-md flex items-center justify-center gap-x-3 w-full text-hover:primary transition-colors duration-200 ease-linear">
                             <IoIosLogOut /> <span>Logout</span>
                         </button>
                     </li>

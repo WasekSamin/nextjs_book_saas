@@ -29,6 +29,7 @@ const Reviews = () => {
     const bookReviews = useReviewStore((state: any) => state.bookReviews);
     const addBookReview = useReviewStore((state: any) => state.addBookReview);
     const updateBookReviewDetails = useReviewStore((state: any) => state.updateBookReviewDetails);
+    const bookReviewIds = useReviewStore((state: any) => state.bookReviewIds);
 
     // Book store
     const bookDetails = useBookStore((state: any) => state.bookDetails);
@@ -41,19 +42,18 @@ const Reviews = () => {
     const getBookReviews = async (page: number) => {
         updateIsBookReviewFetching(true);
         const { items: bookReviews }: any = await fetchBookReviews({ page: page, bookId: bookDetails.id });
-        console.log("REVIEWS", bookReviews);
 
         bookReviews?.map((review: RecordModel) => {
-            console.log(review)
+            if (!bookReviewIds.has(review.id)) {
+                const { user }: any = review?.expand;
 
-            const { user }: any = review?.expand;
+                if (user) {
+                    review["user"] = user;
+                    review["is_review_editable"] = user.id === pb?.authStore?.model?.id;
+                }
 
-            if (user) {
-                review["user"] = user;
-                review["is_review_editable"] = user.id === pb?.authStore?.model?.id;
+                addBookReview(review);
             }
-
-            addBookReview(review);
         });
 
         updateReRenderBookReview(false);
@@ -62,11 +62,11 @@ const Reviews = () => {
     }
 
     const loadBookReviewInView = async () => {
-        fetchBookReviews(bookReviewPage + 1);
+        getBookReviews(bookReviewPage + 1);
     }
 
     useEffect(() => {
-        if (bookDetails) {
+        if (reRenderBookReview && bookDetails) {
             getBookReviews(bookReviewPage);
         }
     }, [reRenderBookReview, bookDetails])
@@ -84,8 +84,8 @@ const Reviews = () => {
                     </div> :
                     bookReviews?.length > 0 ?
                         bookReviews.map((review: RecordModel, index: number) => (
-                            <div key={review.id} className="flex items-center gap-x-5 border-b border-theme pb-5 last:pb-0 last:border-b-0">
-                                <div>
+                            <div key={review.id} className="flex items-center border-b border-theme pb-5 last:pb-0 last:border-b-0">
+                                <div className="mr-5">
                                     {
                                         review.user?.avatar ?
                                             <Image src={pb.files.getUrl(review.user, review.user.avatar, { 'thumb': '35x35' })} width={35} height={35} className="min-w-[35px] min-h-[35px] object-cover rounded-full" alt={`${review.user.name} Image`} /> :
@@ -120,7 +120,7 @@ const Reviews = () => {
 
                                     {
                                         review.is_review_editable &&
-                                        <div>
+                                        <div className="ml-5">
                                             <button onClick={() => handleEditReview(review)} data-tooltip-id={`review__comment-${review.id}`} data-tooltip-content="Edit Review" type="button" className="flex items-center justify-center text-base p-1.5 rounded-full hover:theme-block">
                                                 <FiEdit />
                                                 <Tooltip id={`review__comment-${review.id}`} className="custom__tooltip" />
@@ -128,7 +128,6 @@ const Reviews = () => {
                                         </div>
                                     }
                                 </div>
-
                                 {
                                     index === bookReviews.length - 1 &&
                                     <div ref={bookReviewRef} className="invisible opacity-0 z-[-1]"></div>

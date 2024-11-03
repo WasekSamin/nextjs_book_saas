@@ -43,8 +43,6 @@ const Login = () => {
             case "google":
                 const googleAuthData = await pb.collection('users').authWithOAuth2({ provider: 'google' });
 
-                console.log(googleAuthData);
-
                 if (googleAuthData) {
                     updateUserInfo(googleAuthData);
                 }

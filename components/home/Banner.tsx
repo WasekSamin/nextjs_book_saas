@@ -46,7 +46,6 @@ const Banner = () => {
 
             updateReRenderBannerBooks(false);
         } catch (err) {
-            console.log(err);
             makeToast({
                 toastType: "error",
                 msg: "Failed to fetch banners!",

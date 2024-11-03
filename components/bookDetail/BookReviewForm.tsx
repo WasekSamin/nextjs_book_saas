@@ -184,8 +184,6 @@ const BookReviewForm = () => {
                 expand: "user"
             });
 
-            console.log(reviewRecord);
-
             if (reviewRecord) {
                 const {user}: any = reviewRecord?.expand;
 
