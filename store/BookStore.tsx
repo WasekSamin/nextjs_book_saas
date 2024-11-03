@@ -1,11 +1,34 @@
 import { ListResult, RecordModel } from 'pocketbase';
 import { create } from 'zustand'
 import { pb } from './PocketbaseStore';
+import { isFavouriteBook } from '@/utils/favouriteBookFunc';
 
 const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
 
-const fetchBookDetail = async(bookId: string) => {
-    return null;
+export const fetchBookDetail = async(bookId: string) => {
+    try {
+        const book = await pb.collection('books').getOne(bookId, {
+            expand: 'authors, genres',
+        });
+
+        if (book) {
+            const isFav: boolean = await isFavouriteBook(book.id);
+
+            book.is_favourite = isFav;
+            const {authors, genres}: any = book?.expand;
+
+            if (authors) {
+                book.authors = authors;
+            }
+            if (genres) {
+                book.genres = genres;
+            }
+        }
+
+        return book;
+    } catch(err) {
+        return null;
+    }
 }
 
 export const fetchBooks = async({page, genreId}: {page: number, genreId?: string}) => {
@@ -65,9 +88,39 @@ export const fetchFavouriteBooks = async({page}: {page: number}) => {
 
 export const useBookStore = create((set) => ({
     // Single book details
-    book: null,
+    isBookDetailsFetching: true,
+    updateIsBookDetailsFetching: (isFetching: boolean) => {
+        set(() => ({
+            isBookDetailsFetching: isFetching
+        }))
+    },
+    bookDetails: null,
     getBookDetails: async(bookId: string) => {
-        const {data}: {data: object} = await fetchBookDetail(bookId);
+        const book = await fetchBookDetail(bookId);
+
+        set(() => ({
+            bookDetails: book
+        }))
+    },
+    emptyBookDetails: () => {
+        set(() => ({
+            bookDetails: null,
+            isBookDetailsFetching: true,
+            bookGenres: [],
+            similarBooks: []
+        }))
+    },
+    isSimilarBookFetching: true,
+    updateIsSimilarBookFetching: (isSubmit: boolean) => {
+        set(() => ({
+            isSimilarBookFetching: isSubmit
+        }))
+    },
+    similarBooks: [],
+    addSimilarBooks: (book: RecordModel) => {
+        set((state: any) => ({
+            similarBooks: [...state.similarBooks, book]
+        }))
     },
 
     // Book request submit

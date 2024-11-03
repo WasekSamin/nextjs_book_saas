@@ -39,7 +39,7 @@ const FavouriteBooks = () => {
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
 
-        const {items: favBooks}: any = await fetchFavouriteBooks({ page: page });
+        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
 
         favBooks?.map((favBook: RecordModel) => {
             const { book }: any = favBook?.expand;
@@ -132,6 +132,7 @@ const FavouriteBooks = () => {
                                                                         {
                                                                             book.authors?.length &&
                                                                             <div className="flex flex-wrap gap-0.5">
+                                                                                <span>By </span>
                                                                                 {
                                                                                     book.authors.map((author: RecordModel, index: number) => (
                                                                                         <Link key={author.id} href={`/author/${author.id}`} className="w-fit font-medium">{author.name}{index !== book.authors.length - 1 && ","}</Link>

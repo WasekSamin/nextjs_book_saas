@@ -1,6 +1,5 @@
 import { fetchBooks, useBookStore } from "@/store/BookStore";
 import { pb } from "@/store/PocketbaseStore";
-import { useThemeStore } from "@/store/ThemeStore";
 import { RichTextElement } from "@/utils/RichTextElement";
 import Image from "next/image"
 import Link from "next/link";
@@ -118,6 +117,7 @@ const PopularGenreBooks = () => {
                                                             {
                                                                 book.authors?.length &&
                                                                 <div className="flex flex-wrap gap-0.5">
+                                                                    <span>By </span>
                                                                     {
                                                                         book.authors.map((author: RecordModel, index: number) => (
                                                                             <Link key={author.id} href={`/author/${author.id}`} className="w-fit font-medium">{author.name}{index !== book.authors.length - 1 && ","}</Link>

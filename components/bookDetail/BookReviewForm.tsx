@@ -1,11 +1,16 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import { IoCloseCircle } from "react-icons/io5";
 import { MdOutlineRocketLaunch } from "react-icons/md";
 import FormErrorElement from "../FormErrorElement";
 import { ImSpinner9 } from "react-icons/im";
-import FormSubmitButton from "../FormSubmitButton";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
+import { useReviewStore } from "@/store/ReviewStore";
+import { useBookStore } from "@/store/BookStore";
+import { pb } from "@/store/PocketbaseStore";
+import { makeToast } from "@/utils/toastMesage";
+import { useThemeStore } from "@/store/ThemeStore";
+import { TiCancel } from "react-icons/ti";
 
 type RATING_ON_MOUSE_ACTION = {
     rating: number,
@@ -25,7 +30,20 @@ type FORM_ERROR_TYPE = {
 }
 
 const BookReviewForm = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Theme store
+    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+
+    // Review store
+    const isBookReviewSubmitting = useReviewStore((state: any) => state.isBookReviewSubmitting);
+    const updateIsBookReviewSubmitting = useReviewStore((state: any) => state.updateIsBookReviewSubmitting);
+    const addNewBookReview = useReviewStore((state: any) => state.addNewBookReview);
+    const updateBookReview = useReviewStore((state: any) => state.updateBookReview);
+    const bookReviewDetails = useReviewStore((state: any) => state.bookReviewDetails);
+    const updateBookReviewDetails = useReviewStore((state: any) => state.updateBookReviewDetails);
+
+    // Book store
+    const bookDetails = useBookStore((state: any) => state.bookDetails);
+
     const [bookRating, setBookRating] = useState(DEFAULT_BOOK_RATING_OPTIONS);
     const [formError, setFormError] = useState<FORM_ERROR_TYPE>({
         errorId: -1,
@@ -35,12 +53,37 @@ const BookReviewForm = () => {
     const reviewFormRef = useRef<HTMLFormElement | null>(null);
     const reviewMessageRef = useRef<HTMLTextAreaElement | null>(null);
 
+    useEffect(() => {
+        if (bookReviewDetails) {
+            setFormError({
+                errorId: -1,
+                errorMsg: ""
+            });
+
+            setBookRating({
+                currentRating: bookReviewDetails.rating,
+                hoverRating: 0,
+                prevRating: bookReviewDetails.rating,
+                showClearRating: true
+            });
+            if (reviewMessageRef.current) {
+                reviewMessageRef.current.value = bookReviewDetails.review_message;
+            }
+        }
+    }, [bookReviewDetails])
+
     const handleFormError = ({ errId, errMsg, name, isError }: HANDLE_FORM_ERROR) => {
         if (!name) {
             if (errId === 1 && errMsg) {
                 setFormError({
                     errorId: errId,
                     errorMsg: errMsg
+                });
+            } else if (errId === 2 && errMsg) {
+                makeToast({
+                    toastType: "error",
+                    msg: errMsg,
+                    isDark: isDarkMode
                 });
             }
         } else {
@@ -63,6 +106,8 @@ const BookReviewForm = () => {
                     }
             }
         }
+
+        updateIsBookReviewSubmitting(false);
     }
 
     // When a star is hovered/released
@@ -88,25 +133,134 @@ const BookReviewForm = () => {
     const handleReviewSubmit = async (e: any) => {
         e.preventDefault();
 
-        setIsSubmitting(true);
+        updateIsBookReviewSubmitting(true);
 
-        // setFormError({
-        //     errorId: -1,
-        //     errorMsg: ""
-        // });
+        setFormError({
+            errorId: -1,
+            errorMsg: ""
+        });
 
-        // const rating = bookRating.currentRating;
-        // const reviewMessage = reviewMessageRef.current?.value?.trim();
+        if (!bookDetails) {
+            handleFormError({ errId: 2, errMsg: "Invalid book!" });
+            return;
+        }
 
-        // if (rating < 1) {
-        //     handleFormError({ errId: 1, errMsg: "Rating is required!" });
-        //     return;
-        // }
-        // if (reviewMessage === "") {
-        //     handleFormError({
-        //         name: "message", isError: true
-        //     });
-        // }
+        const rating = bookRating.currentRating;
+        const reviewMessage = reviewMessageRef.current?.value?.trim() ?? "";
+
+        if (rating < 1) {
+            handleFormError({ errId: 1, errMsg: "Rating is required!" });
+            return;
+        }
+        if (reviewMessage === "") {
+            handleFormError({
+                name: "message", isError: true
+            });
+            return;
+        }
+
+        if (!bookReviewDetails) {
+            await createBookReview({
+                rating: rating,
+                msg: reviewMessage
+            });
+        } else {
+            await editBookReview({
+                rating: rating,
+                msg: reviewMessage
+            });
+        }
+    }
+
+    const editBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
+        const formData = {
+            rating: rating,
+            review_message: msg,
+            is_edited: true
+        }
+
+        try {
+            const reviewRecord = await pb.collection('feedbacks').update(bookReviewDetails.id, formData, {
+                expand: "user"
+            });
+
+            console.log(reviewRecord);
+
+            if (reviewRecord) {
+                const {user}: any = reviewRecord?.expand;
+
+                if (user) {
+                    reviewRecord["user"] = user;
+                    reviewRecord["is_review_editable"] = user.id === pb?.authStore?.model?.id;
+                }
+                updateBookReview(reviewRecord);
+
+                makeToast({
+                    toastType: "success",
+                    msg: "Review updated successfully.",
+                    isDark: isDarkMode
+                });
+            }
+
+            updateIsBookReviewSubmitting(false);
+            updateBookReviewDetails(null);
+
+            resetBookReviewForm();
+        } catch (err) {
+            makeToast({
+                toastType: "error",
+                msg: "Failed to update the review!",
+                isDark: isDarkMode
+            });
+            updateIsBookReviewSubmitting(false);
+            updateBookReviewDetails(null);
+        }
+    }
+
+    const createBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
+        const formData = {
+            rating: rating,
+            review_message: msg,
+            user: pb?.authStore?.model?.id,
+            book: bookDetails.id
+        }
+
+        try {
+            const reviewRecord = await pb.collection('feedbacks').create(formData, {
+                expand: "user"
+            });
+
+            if (reviewRecord) {
+                const { user: reviewRecordUser }: any = reviewRecord?.expand;
+
+                if (reviewRecordUser) {
+                    reviewRecord["user"] = reviewRecordUser;
+                }
+                reviewRecord["is_review_editable"] = true;
+                addNewBookReview(reviewRecord);
+
+                makeToast({
+                    toastType: "success",
+                    msg: "Review submitted successfully.",
+                    isDark: isDarkMode
+                });
+                updateIsBookReviewSubmitting(false);
+
+                resetBookReviewForm();
+            }
+        } catch (err) {
+            makeToast({
+                toastType: "error",
+                msg: "Failed to submit the review!",
+                isDark: isDarkMode
+            });
+            updateIsBookReviewSubmitting(false);
+        }
+    }
+
+    const resetBookReviewForm = () => {
+        reviewFormRef.current?.reset();
+        setBookRating(DEFAULT_BOOK_RATING_OPTIONS);
     }
 
     const handleFormInputChange = (e: any) => {
@@ -124,6 +278,12 @@ const BookReviewForm = () => {
                 isError: false
             });
         }
+    }
+
+    const cancelReviewUpdate = () => {
+        setBookRating(DEFAULT_BOOK_RATING_OPTIONS);
+        reviewFormRef.current?.reset();
+        updateBookReviewDetails(null);
     }
 
     return (
@@ -184,15 +344,24 @@ const BookReviewForm = () => {
 
                 <textarea onChange={handleFormInputChange} rows={3} ref={reviewMessageRef} id="message" name="message" className="focus:outline-none px-3 py-2 rounded-md input__element focus:ring-2 focus:ring-indigo-400" placeholder="Your review"></textarea>
 
-                <div>
-                    <button disabled={isSubmitting} type="submit" className={`flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
-                        Comment
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <button disabled={isBookReviewSubmitting} type="submit" className={`w-full sm:w-fit flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isBookReviewSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
                         {
-                            isSubmitting ?
+                            bookReviewDetails ? "Update Comment" : "Comment"
+                        }
+                        {
+                            isBookReviewSubmitting ?
                                 <ImSpinner9 className="btn__spinner" /> :
                                 <MdOutlineRocketLaunch />
                         }
                     </button>
+                    {
+                        bookReviewDetails &&
+                        <button onClick={cancelReviewUpdate} type="button" className={`w-full sm:w-fit flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isBookReviewSubmitting ? "bg-rose-400" : "bg-rose-500 hover:bg-rose-600"} transition-colors duration-200 ease-linear`}>
+                            Cancel
+                            <TiCancel className="text-lg" />
+                        </button>
+                    }
                 </div>
             </form>
         </div>

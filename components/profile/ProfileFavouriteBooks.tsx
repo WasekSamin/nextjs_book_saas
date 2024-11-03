@@ -174,8 +174,15 @@ const ProfileFavouriteBooks = () => {
                                                             </div>
 
                                                             {
-                                                                book.author &&
-                                                                <Link href={`/author/${book.author.id}`} className="w-fit font-medium"><span className="font-normal">By</span> {book.author.name}</Link>
+                                                                book.authors?.length &&
+                                                                <div className="flex flex-wrap gap-0.5">
+                                                                    <span>By </span>
+                                                                    {
+                                                                        book.authors.map((author: RecordModel, index: number) => (
+                                                                            <Link key={author.id} href={`/author/${author.id}`} className="w-fit font-medium">{author.name}{index !== book.authors.length - 1 && ","}</Link>
+                                                                        ))
+                                                                    }
+                                                                </div>
                                                             }
                                                         </div>
                                                     </div>

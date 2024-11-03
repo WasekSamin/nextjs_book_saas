@@ -46,7 +46,7 @@ const DesktopNavbar = () => {
       {
         pb.authStore?.model &&
         <div onClick={() => toggleBookModalSearch(true)} ref={navSearchRef} className="w-1/2 flex items-center gap-x-3 rounded-md py-1.5 px-3 theme-block transition-all duration-200 ease-linear">
-          <input value="" onFocus={searchNavOnFocus} onBlur={searchNavOnBlur} type="text" className="w-full bg-transparent focus:outline-none" placeholder="Search books..." />
+          <input onFocus={searchNavOnFocus} onBlur={searchNavOnBlur} type="text" className="w-full bg-transparent focus:outline-none" placeholder="Search books..." readOnly={true} />
           <IoSearch className="text-xl text-stone-500/80 cursor-pointer" />
         </div>
       }

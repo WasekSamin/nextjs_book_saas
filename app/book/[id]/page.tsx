@@ -8,9 +8,38 @@ import { useParams } from "next/navigation";
 import "@/css/book_detail/BookDetails.css";
 import SimilarBooks from "@/components/bookDetail/SimilarBooks";
 import BookReview from "@/components/bookDetail/BookReview";
+import { useBookStore } from "@/store/BookStore";
+import { useEffect } from "react";
+import { useReviewStore } from "@/store/ReviewStore";
 
 const BookDetail = () => {
     const {id: bookId} = useParams();
+
+    // Book store
+    const updateIsBookDetailsFetching = useBookStore((state: any) => state.updateIsBookDetailsFetching);
+    const getBookDetails = useBookStore((state: any) => state.getBookDetails);
+    const emptyBookDetails = useBookStore((state: any) => state.emptyBookDetails);
+
+    // Review store
+    const emptyBookReviewDetails = useReviewStore((state: any) => state.emptyBookReviewDetails);
+    const emptyBookReview = useReviewStore((state: any) => state.emptyBookReview);
+
+    const fetchBook = async() => {
+        await getBookDetails(bookId);
+        updateIsBookDetailsFetching(false);
+    }
+
+    useEffect(() => {
+        if (bookId) {
+            fetchBook();
+        }
+
+        return () => {
+            emptyBookDetails();
+            emptyBookReviewDetails();
+            emptyBookReview();
+        }
+    }, [bookId])
 
     return (
         <>
