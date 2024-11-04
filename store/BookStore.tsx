@@ -31,20 +31,26 @@ export const fetchBookDetail = async(bookId: string) => {
     }
 }
 
-export const fetchBooks = async({page, genreId}: {page: number, genreId?: string}) => {
+export const fetchBooks = async({page, genreId, authorId}: {page: number, genreId?: string, authorId?: string}) => {
     let bookList: ListResult<RecordModel>;
 
     try {
-        if (!genreId) {
-            bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
-                sort: "-created",
-                expand: "authors"
-            });
-        } else {
+        if (genreId) {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `genres~"${genreId}"`,
                 expand: "authors",
                 sort: "-created",
+            });
+        } else if (authorId) {
+            bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
+                filter: `authors~"${authorId}"`,
+                expand: "authors",
+                sort: "-created",
+            });
+        } else {
+            bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
+                sort: "-created",
+                expand: "authors"
             });
         }
 
@@ -122,6 +128,11 @@ export const useBookStore = create((set) => ({
             similarBooks: [...state.similarBooks, book]
         }))
     },
+    emptySimilarBooks: () => {
+        set(() => ({
+            similarBooks: []
+        }))
+    },
 
     // Book request submit
     isSubmittingBookRequest: false,
@@ -196,8 +207,8 @@ export const useBookStore = create((set) => ({
     emptyPopGenreBooks: () => {
         set(() => ({
             popGenreBooks: [],
+            popGenreBookPage: 1,
             reRenderPopGenreBooks: true,
-            popGenreBookPage: 1
         }))
     },
     // Loading icon for paginated book data fetching
@@ -205,6 +216,72 @@ export const useBookStore = create((set) => ({
     updateIsPopGenreBookDataFetching: (isFetching: boolean) => {
         set(() => ({
             isPopGenreBookDataFetching: isFetching
+        }))
+    },
+
+    // Genre wise books
+    reRenderGenreBooks: true,
+    updateReRenderGenreBooks: (isRender: boolean) => {
+        set(() => ({
+            reRenderGenreBooks: isRender
+        }))
+    },
+    isGenreBookFetching: false,
+    updateIsGenreBookFetching: (isFetching: boolean) => {
+        set(() => ({
+            isGenreBookFetching: isFetching
+        }))
+    },
+    genreBookPage: 1,
+    updateGenreBookPage: (page: number) => {
+        set(() => ({
+            genreBookPage: page
+        }))
+    },
+    genreBooks: [],
+    addGenreBooks: (book: RecordModel) => {
+        set((state: any) => ({
+            genreBooks: [...state.genreBooks, book]
+        }))
+    },
+    emptyGenreBooks: () => {
+        set(() => ({
+            genreBooks: [],
+            genreBookPage: 1,
+            reRenderGenreBooks: true
+        }))
+    },
+
+    // Author wise books
+    authorBookPage: 1,
+    updateAuthorBookPage: (page: number) => {
+        set(() => ({
+            authorBookPage: page
+        }))
+    },
+    reRenderAuthorBooks: true,
+    updateReRenderAuthorBooks: (isRender: boolean) => {
+        set(() => ({
+            reRenderAuthorBooks: isRender
+        }))
+    },
+    isAuthorBookFetching: false,
+    updateIsAuthorBookFetching: (isFetching: boolean) => {
+        set(() => ({
+            isAuthorBookFetching: isFetching
+        }))
+    },
+    authorBooks: [],
+    addAuthorBooks: (book: RecordModel) => {
+        set((state: any) => ({
+            authorBooks: [...state.authorBooks, book]
+        }))
+    },
+    emptyAuthorBooks: () => {
+        set(() => ({
+            authorBooks: [],
+            authorBookPage: 1,
+            reRenderAuthorBooks: true,
         }))
     },
     

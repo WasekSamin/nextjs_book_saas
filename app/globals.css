@@ -157,6 +157,10 @@ body.dark {
     color: var(--light-primary) !important;
     background-color: var(--stone-800) !important;
   }
+
+  .book__customMargin {
+    @apply mt-[-60px] lg:mt-0;
+  }
 }
 
 .react-datepicker {

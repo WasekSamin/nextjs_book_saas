@@ -71,15 +71,19 @@ const SearchBookModal = () => {
 
     const { items: books }: any = await searchBooks({ page: page, searchText: searchText });
 
-    books?.map((book: RecordModel) => {
-      const { authors }: any = book?.expand;
+    if (books) {
+      for (let i=0; i<books.length; i++) {
+        const book: RecordModel = books[i];
 
-      if (authors) {
-        book.authors = authors;
+        const { authors }: any = book?.expand;
+
+        if (authors) {
+          book.authors = authors;
+        }
+
+        addSearchedBooks(book);
       }
-
-      addSearchedBooks(book);
-    });
+    }
 
     updateIsSearchedBooksFetching(false);
     updateSearchedBookPage(page);

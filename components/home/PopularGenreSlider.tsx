@@ -39,9 +39,13 @@ const PopularGenreSlider = () => {
     const getAllGenres = async () => {
         const genres: RecordModel[] = await fetchAllGenres({searchText: ""});
 
-        genres?.map((genre: RecordModel) => {
-            addGenres(genre);
-        });
+        if (genres) {
+            for (let i=0; i<genres.length; i++) {
+                const genre: RecordModel = genres[i];
+
+                addGenres(genre);
+            }
+        }
 
         updateReRenderGenre(false);
     }

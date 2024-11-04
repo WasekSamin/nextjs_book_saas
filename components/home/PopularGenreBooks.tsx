@@ -39,16 +39,20 @@ const PopularGenreBooks = () => {
         updateIsPopGenreBookDataFetching(true);
         const { items: books }: any = await fetchBooks({page: page, genreId: activeGenre});
 
-        books?.map(async (book: RecordModel) => {
-            const isFav: boolean = await isFavouriteBook(book.id);
-            book.is_favourite = isFav;
-            const {authors}: any = book?.expand;
+        if (books) {
+            for (let i=0; i<books.length; i++) {
+                const book: RecordModel = books[i];
 
-            if (authors) {
-                book.authors = authors;
+                const isFav: boolean = await isFavouriteBook(book.id);
+                book.is_favourite = isFav;
+                const {authors}: any = book?.expand;
+
+                if (authors) {
+                    book.authors = authors;
+                }
+                addPopGenreBook(book);
             }
-            addPopGenreBook(book);
-        });
+        }
 
         updateReRenderPopGenreBooks(false);
         updateIsPopGenreBookDataFetching(false);
@@ -61,7 +65,11 @@ const PopularGenreBooks = () => {
 
     useEffect(() => {
         if (reRenderPopGenreBooks) {
-            fetchGenreBooks(popGenreBookPage);
+            fetchGenreBooks(1);
+        }
+
+        return () => {
+            updatePopGenreBookPage(1);
         }
     }, [reRenderPopGenreBooks])
 
@@ -98,7 +106,7 @@ const PopularGenreBooks = () => {
                                                 <Link href={`book/${book.id}`} className="translate-y-[-25%]">
                                                     <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
                                                 </Link>
-                                                <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 mt-[-60px] lg:mt-0">
+                                                <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                     <div className="lg:w-full flex justify-end order-2 lg:order-1">
                                                         <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                             {

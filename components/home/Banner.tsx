@@ -22,6 +22,7 @@ import { useThemeStore } from '@/store/ThemeStore';
 import { useBookStore } from '@/store/BookStore';
 import { pb } from '@/store/PocketbaseStore';
 import { ImSpinner } from 'react-icons/im';
+import { RecordModel } from 'pocketbase';
 
 const Banner = () => {
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
@@ -38,11 +39,15 @@ const Banner = () => {
                 requestKey: null
             });
 
-            const { items } = bannerList;
+            const { items: banners } = bannerList;
 
-            items?.map(book => {
-                addBannerBook(book);
-            });
+            if (banners) {
+                for (let i=0; i<banners.length; i++) {
+                    const book: RecordModel = banners[i];
+
+                    addBannerBook(book);
+                }
+            }
 
             updateReRenderBannerBooks(false);
         } catch (err) {

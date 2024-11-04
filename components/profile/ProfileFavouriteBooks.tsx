@@ -77,23 +77,27 @@ const ProfileFavouriteBooks = () => {
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
 
-        const {items: favBooks}: any = await fetchFavouriteBooks({ page: page });
+        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
 
-        favBooks?.map((favBook: RecordModel) => {
-            const { book }: any = favBook?.expand;
+        if (favBooks) {
+            for (let i = 0; i < favBooks.length; i++) {
+                const favBook: RecordModel = favBooks[i];
 
-            if (book) {
-                book.is_favourite = true;
+                const { book }: any = favBook?.expand;
 
-                const { authors } = book?.expand;
+                if (book) {
+                    book.is_favourite = true;
 
-                if (authors) {
-                    book.authors = authors;
+                    const { authors } = book?.expand;
+
+                    if (authors) {
+                        book.authors = authors;
+                    }
                 }
-            }
 
-            addFavouriteBook(book);
-        })
+                addFavouriteBook(book);
+            }
+        }
 
         updateReRenderFavouriteBooks(false);
         updateIsFavouriteBookDataFetching(false);

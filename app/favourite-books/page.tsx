@@ -41,21 +41,25 @@ const FavouriteBooks = () => {
 
         const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
 
-        favBooks?.map((favBook: RecordModel) => {
-            const { book }: any = favBook?.expand;
+        if (favBooks) {
+            for (let i=0; i<favBooks.length; i++) {
+                const favBook: RecordModel = favBooks[i];
 
-            if (book) {
-                book.is_favourite = true;
+                const { book }: any = favBook?.expand;
 
-                const { authors } = book?.expand;
+                if (book) {
+                    book.is_favourite = true;
 
-                if (authors) {
-                    book.authors = authors;
+                    const { authors } = book?.expand;
+
+                    if (authors) {
+                        book.authors = authors;
+                    }
                 }
-            }
 
-            addFavouriteBook(book);
-        })
+                addFavouriteBook(book);
+            }
+        }
 
         updateReRenderFavouriteBooks(false);
         updateIsFavouriteBookDataFetching(false);
@@ -113,7 +117,7 @@ const FavouriteBooks = () => {
                                                             <Link href={`book/${book.id}`} className="translate-y-[-25%]">
                                                                 <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
                                                             </Link>
-                                                            <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 mt-[-60px] lg:mt-0">
+                                                            <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                                 <div className="lg:w-full flex justify-end order-2 lg:order-1">
                                                                     <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                         {

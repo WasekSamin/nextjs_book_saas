@@ -15,6 +15,17 @@ export const fetchAllGenres = async ({searchText}: {searchText: string}) => {
     }
 }
 
+export const fetchGenreDetails = async(genreId: string) => {
+    try {
+        const genreRecord: RecordModel = await pb.collection('genres').getOne(genreId);
+
+        return genreRecord;
+    } catch(err) {
+        return null;
+    }
+}
+
+
 export const useGenreStore = create((set) => ({
     activeGenre: "",
     updateActiveGenre: (tab: string) => {
@@ -72,5 +83,17 @@ export const useGenreStore = create((set) => ({
         set(() => ({
             searchedGenres: []
         }))
-    }
+    },
+
+    genreDetails: null,
+    updateGenreDetails: (genre: RecordModel) => {
+        set(() => ({
+            genreDetails: genre
+        }))
+    },
+    emptyGenreDetails: () => {
+        set(() => ({
+            genreDetails: null
+        }))
+    },
 }));

@@ -43,8 +43,10 @@ const Reviews = () => {
         updateIsBookReviewFetching(true);
         const { items: bookReviews }: any = await fetchBookReviews({ page: page, bookId: bookDetails.id });
 
-        bookReviews?.map((review: RecordModel) => {
-            if (!bookReviewIds.has(review.id)) {
+        if (bookReviews) {
+            for (let i=0; i<bookReviews.length; i++) {
+                const review: RecordModel = bookReviews[i];
+
                 const { user }: any = review?.expand;
 
                 if (user) {
@@ -54,7 +56,7 @@ const Reviews = () => {
 
                 addBookReview(review);
             }
-        });
+        }
 
         updateReRenderBookReview(false);
         updateIsBookReviewFetching(false);
@@ -67,7 +69,7 @@ const Reviews = () => {
 
     useEffect(() => {
         if (reRenderBookReview && bookDetails) {
-            getBookReviews(bookReviewPage);
+            getBookReviews(1);
         }
     }, [reRenderBookReview, bookDetails])
 
