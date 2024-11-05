@@ -35,6 +35,7 @@ const FavouriteBooks = () => {
     const updateIsFavouriteBookSubmitting = useBookStore((state: any) => state.updateIsFavouriteBookSubmitting);
     const removeFavouriteBook = useBookStore((state: any) => state.removeFavouriteBook);
     const emptyPopGenreBooks = useBookStore((state: any) => state.emptyPopGenreBooks);
+    const emptyPurchasedBooks = useBookStore((state: any) => state.emptyPurchasedBooks);
 
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
@@ -91,6 +92,7 @@ const FavouriteBooks = () => {
         removeFavouriteBook(favouriteBook);
         updateIsFavouriteBookSubmitting(false);
         emptyPopGenreBooks();
+        emptyPurchasedBooks();
     }
 
     return (

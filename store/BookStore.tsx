@@ -92,6 +92,20 @@ export const fetchFavouriteBooks = async({page}: {page: number}) => {
     }
 }
 
+export const fetchPurchasedBooks = async({page}: {page: number}) => {
+    try {
+        const purchasedBookList: ListResult<RecordModel> = await pb.collection("purchased_books").getList(page, PAGINATION_LIMIT, {
+            filter: `user.id="${pb?.authStore?.model?.id}"`,
+            expand: "book, book.authors",
+            sort: "-created"
+        })
+
+        return purchasedBookList;
+    } catch(err) {
+        return [];
+    }
+}
+
 export const useBookStore = create((set) => ({
     // Single book details
     isBookDetailsFetching: true,
@@ -292,12 +306,6 @@ export const useBookStore = create((set) => ({
             reRenderFavouriteBooks: isRender
         }))
     },
-    favouriteBookPage: 1,
-    updateFavouriteBookPage: (page: number) => {
-        set(() => ({
-            favouriteBookPage: page
-        }))
-    },
     isFavouriteBookDataFetching: true,
     updateIsFavouriteBookDataFetching: (isFetching: boolean) => {
         set(() => ({
@@ -308,6 +316,12 @@ export const useBookStore = create((set) => ({
     updateIsFavouriteBookSubmitting: (isSubmit: boolean) => {
         set(() => ({
             isFavouriteBookSubmitting: isSubmit
+        }))
+    },
+    favouriteBookPage: 1,
+    updateFavouriteBookPage: (page: number) => {
+        set(() => ({
+            favouriteBookPage: page
         }))
     },
     favouriteBooks: [],
@@ -326,6 +340,39 @@ export const useBookStore = create((set) => ({
             favouriteBooks: [],
             reRenderFavouriteBooks: true,
             favouriteBookPage: 1
+        }))
+    },
+
+    // Purchased books
+    reRenderPurchasedBooks: true,
+    updateReRenderPurchasedBooks: (isRender: boolean) => {
+        set(() => ({
+            reRenderPurchasedBooks: isRender
+        }))
+    },
+    isPurchasedBooksFetching: false,
+    updateIsPurcasedBooksFetching: (isFetching: boolean) => {
+        set(() => ({
+            isPurchasedBooksFetching: isFetching
+        }))
+    },
+    purchasedBookPage: 1,
+    updatePurchasedBookPage: (page: number) => {
+        set(() => ({
+            purchasedBookPage: page
+        }))
+    },
+    purchasedBooks: [],
+    addPurchasedBook: (book: RecordModel) => {
+        set((state: any) => ({
+            purchasedBooks: [...state.purchasedBooks, book]
+        }))
+    },
+    emptyPurchasedBooks: () => {
+        set(() => ({
+            purchasedBooks: [],
+            purchasedBookPage: 1,
+            reRenderPurchasedBooks: true
         }))
     },
 
