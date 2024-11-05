@@ -1,4 +1,3 @@
-import { BOOKS } from "@/data";
 import { useNavStore } from "@/store/NavStore";
 import { useThemeStore } from "@/store/ThemeStore";
 import { RichTextElement } from "@/utils/RichTextElement";
@@ -86,7 +85,6 @@ const SearchBookModal = () => {
     }
 
     updateIsSearchedBooksFetching(false);
-    updateSearchedBookPage(page);
   }
 
   const handleSearchBook = async (e: any) => {
@@ -135,7 +133,8 @@ const SearchBookModal = () => {
   }
 
   const loadSearchedBookInView = async () => {
-    bookSearch(searchedBookPage + 1);
+    updateSearchedBookPage(searchedBookPage + 1);
+    await bookSearch(searchedBookPage + 1);
   }
 
   useEffect(() => {

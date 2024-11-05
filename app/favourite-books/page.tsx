@@ -63,8 +63,22 @@ const FavouriteBooks = () => {
 
         updateReRenderFavouriteBooks(false);
         updateIsFavouriteBookDataFetching(false);
-        updateFavouriteBookPage(page);
     }
+
+    const loadFavouriteBookInView = async () => {
+        updateFavouriteBookPage(favouriteBookPage + 1);
+        await getFavouriteBooks(favouriteBookPage + 1);
+    }
+
+    useEffect(() => {
+        if (reRenderFavouriteBooks) {
+            getFavouriteBooks(favouriteBookPage);
+        }
+    }, [reRenderFavouriteBooks])
+
+    useEffect(() => {
+        favouriteBookInView && loadFavouriteBookInView();
+    }, [favouriteBookInView])
 
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
@@ -78,20 +92,6 @@ const FavouriteBooks = () => {
         updateIsFavouriteBookSubmitting(false);
         emptyPopGenreBooks();
     }
-
-    const loadFavouriteBookInView = async () => {
-        getFavouriteBooks(favouriteBookPage + 1);
-    }
-
-    useEffect(() => {
-        if (reRenderFavouriteBooks) {
-            getFavouriteBooks(favouriteBookPage);
-        }
-    }, [reRenderFavouriteBooks])
-
-    useEffect(() => {
-        favouriteBookInView && loadFavouriteBookInView();
-    }, [favouriteBookInView])
 
     return (
         <>

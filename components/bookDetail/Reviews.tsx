@@ -60,11 +60,11 @@ const Reviews = () => {
 
         updateReRenderBookReview(false);
         updateIsBookReviewFetching(false);
-        updateBookReviewPage(page);
     }
 
     const loadBookReviewInView = async () => {
-        getBookReviews(bookReviewPage + 1);
+        updateBookReviewPage(bookReviewPage + 1);
+        await getBookReviews(bookReviewPage + 1);
     }
 
     useEffect(() => {

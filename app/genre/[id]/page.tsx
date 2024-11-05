@@ -67,11 +67,11 @@ const GenreWiseBook = () => {
 
         updateReRenderGenreBooks(false);
         updateIsGenreBookFetching(false);
-        updateGenreBookPage(page);
     }
 
     const loadGenreBookInView = async () => {
-        getGenreWiseBooks(genreBookPage + 1);
+        updateGenreBookPage(genreBookPage + 1);
+        await getGenreWiseBooks(genreBookPage + 1);
     }
 
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {

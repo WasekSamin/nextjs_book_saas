@@ -37,15 +37,15 @@ const PopularGenreBooks = () => {
 
     const fetchGenreBooks = async (page: number) => {
         updateIsPopGenreBookDataFetching(true);
-        const { items: books }: any = await fetchBooks({page: page, genreId: activeGenre});
+        const { items: books }: any = await fetchBooks({ page: page, genreId: activeGenre });
 
         if (books) {
-            for (let i=0; i<books.length; i++) {
+            for (let i = 0; i < books.length; i++) {
                 const book: RecordModel = books[i];
 
                 const isFav: boolean = await isFavouriteBook(book.id);
                 book.is_favourite = isFav;
-                const {authors}: any = book?.expand;
+                const { authors }: any = book?.expand;
 
                 if (authors) {
                     book.authors = authors;
@@ -56,11 +56,11 @@ const PopularGenreBooks = () => {
 
         updateReRenderPopGenreBooks(false);
         updateIsPopGenreBookDataFetching(false);
-        updatePopGenreBookPage(page);
     }
 
     const loadPopGenreBookInView = async () => {
-        fetchGenreBooks(popGenreBookPage + 1);
+        updatePopGenreBookPage(popGenreBookPage + 1);
+        await fetchGenreBooks(popGenreBookPage + 1);
     }
 
     useEffect(() => {
@@ -168,7 +168,7 @@ const PopularGenreBooks = () => {
                         </div>
 
                         {
-                            isPopGenreBookDataFetching && 
+                            isPopGenreBookDataFetching &&
                             <div className="mt-5 w-full flex items-center justify-center">
                                 <ImSpinner className="page__spinner" />
                             </div>

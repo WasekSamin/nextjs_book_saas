@@ -67,11 +67,11 @@ const AuthorWiseBook = () => {
 
         updateReRenderAuthorBooks(false);
         updateIsAuthorBookFetching(false);
-        updateAuthorBookPage(page);
     }
 
     const loadAuthorBookInView = async () => {
-        getAuthorWiseBooks(authorBookPage + 1);
+        updateAuthorBookPage(authorBookPage + 1);
+        await getAuthorWiseBooks(authorBookPage + 1);
     }
 
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {

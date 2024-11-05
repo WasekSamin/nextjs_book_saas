@@ -24,12 +24,12 @@ const SimilarBooks = () => {
     const updateIsFavouriteBookSubmitting = useBookStore((state: any) => state.updateIsFavouriteBookSubmitting);
     const emptyFavouriteBooks = useBookStore((state: any) => state.emptyFavouriteBooks);
 
-    const getSimilarBooks = async () => {
+    const getSimilarBooks = async (page: number) => {
         if (bookDetails.genres) {
             for (let i = 0; i < bookDetails.genres.length; i++) {
                 const genre: RecordModel = bookDetails.genres[i];
 
-                const { items: books }: any = await fetchBooks({ page: 1, genreId: genre.id });
+                const { items: books }: any = await fetchBooks({ page: page, genreId: genre.id });
 
                 if (books) {
                     for (let j = 0; j < books.length; j++) {
@@ -68,7 +68,7 @@ const SimilarBooks = () => {
 
     useEffect(() => {
         if (bookDetails && bookId === bookDetails.id) {
-            getSimilarBooks();
+            getSimilarBooks(1);
         }
     }, [bookId, bookDetails])
 
