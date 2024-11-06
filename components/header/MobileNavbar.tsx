@@ -8,6 +8,7 @@ import { useRef } from "react";
 import { RiMenu2Line } from "react-icons/ri";
 import MobileNavSidebar from "./MobileNavSidebar";
 import { AnimatePresence } from "framer-motion";
+import { pb } from "@/store/PocketbaseStore";
 
 const MobileNavbar = () => {
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
@@ -40,7 +41,10 @@ const MobileNavbar = () => {
                     <button type="button" onClick={() => toggleBookModalSearch(true)} className="p-2 theme-block rounded-full">
                         <IoSearch className={`text-xl ${isDarkMode ? "" : "text-stone-500/80"}`} />
                     </button>
-                    <NavProfile />
+                    {
+                        pb?.authStore?.model &&
+                        <NavProfile />
+                    }
                     <DarkModeSwitch
                         checked={isDarkMode}
                         onChange={toggleDarkMode}
