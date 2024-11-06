@@ -286,7 +286,7 @@ const BookReviewForm = () => {
 
     return (
         <div>
-            <form ref={reviewFormRef} onSubmit={handleReviewSubmit} className="flex flex-col gap-y-5 p-5 theme-block rounded-md">
+            <form ref={reviewFormRef} onSubmit={handleReviewSubmit} tabIndex={-1} id="review__form" className="flex flex-col gap-y-5 p-5 theme-block rounded-md">
                 <div className="flex flex-col gap-y-1.5">
                     <label htmlFor="rating" className="font-medium">Rating</label>
                     <div className="flex flex-wrap items-center gap-3">

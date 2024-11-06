@@ -106,6 +106,15 @@ export const fetchPurchasedBooks = async({page}: {page: number}) => {
     }
 }
 
+export const fetchPurchasedBook = async(bookId: string) => {
+    try {
+        const bookRecord: RecordModel = await pb.collection("purchased_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`);
+        return bookRecord;
+    } catch(err) {
+        return null;
+    }
+}
+
 export const useBookStore = create((set) => ({
     // Single book details
     isBookDetailsFetching: true,
@@ -373,6 +382,33 @@ export const useBookStore = create((set) => ({
             purchasedBooks: [],
             purchasedBookPage: 1,
             reRenderPurchasedBooks: true
+        }))
+    },
+    purchasedBookDetails: null,
+    updatePurchasedBookDetails: (book: RecordModel) => {
+        set(() => ({
+            purchasedBookDetails: book
+        }))
+    },
+    emptyPurchasedBookDetails: () => {
+        set(() => ({
+            purchasedBookDetails: null,
+            isPurchasedBookSubmitting: false,
+            showPurchasedBookModal: false
+        }))
+    },
+
+    isPurchasedBookSubmitting: false,
+    updateIsPurchasedBookSubmitting: (isSubmitting: boolean) => {
+        set(() => ({
+            isPurchasedBookSubmitting: isSubmitting
+        }))
+    },
+
+    showPurchasedBookModal: false,
+    updateShowPurchasedBookModal: (show: boolean) => {
+        set(() => ({
+            showPurchasedBookModal: show
         }))
     },
 

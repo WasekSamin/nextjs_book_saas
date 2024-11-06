@@ -3,13 +3,15 @@ import { toast, ToastOptions } from 'react-toastify';
 type TOAST_TYPE = {
     toastType: string,
     msg: string,
-    isDark: boolean
+    isDark: boolean,
+    autoClose?: number
 }
 
-export const makeToast = ({toastType, msg, isDark}: TOAST_TYPE) => {
+export const makeToast = ({toastType, msg, isDark, autoClose=5000}: TOAST_TYPE) => {
     const toastOptions: ToastOptions = {
         position: "top-right",
-        theme: isDark ? "dark" : "light"
+        theme: isDark ? "dark" : "light",
+        autoClose: autoClose
     }
 
     switch(toastType) {

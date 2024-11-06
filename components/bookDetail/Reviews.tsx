@@ -37,6 +37,10 @@ const Reviews = () => {
 
     const handleEditReview = (review: RecordModel) => {
         updateBookReviewDetails(review);
+
+        document.body.querySelector("#review__form")?.scrollIntoView({
+            behavior: "smooth"
+        });
     }
 
     const getBookReviews = async (page: number) => {

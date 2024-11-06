@@ -26,6 +26,9 @@ const SimilarBooks = () => {
 
     const getSimilarBooks = async (page: number) => {
         if (bookDetails.genres) {
+
+            let genreBookIds = new Set();
+
             for (let i = 0; i < bookDetails.genres.length; i++) {
                 const genre: RecordModel = bookDetails.genres[i];
 
@@ -37,15 +40,19 @@ const SimilarBooks = () => {
 
                         if (book.id === bookDetails.id) continue;
 
-                        const isFav: boolean = await isFavouriteBook(book.id);
-                        book.is_favourite = isFav;
-                        const { authors }: any = book?.expand;
+                        if (!genreBookIds.has(book.id)) {
+                            genreBookIds.add(book.id);
 
-                        if (authors) {
-                            book.authors = authors;
+                            const isFav: boolean = await isFavouriteBook(book.id);
+                            book.is_favourite = isFav;
+                            const { authors }: any = book?.expand;
+    
+                            if (authors) {
+                                book.authors = authors;
+                            }
+    
+                            addSimilarBooks(book);
                         }
-
-                        addSimilarBooks(book);
                     }
                 }
             }
