@@ -85,7 +85,7 @@ const SimilarBooks = () => {
 
             <div className={`${similarBooks?.length > 0 ? "mt-20" : ""}`}>
                 {
-                    isSimilarBookFetching ?
+                    isSimilarBookFetching || !bookDetails ?
                         <div className="w-full flex items-center justify-center">
                             <ImSpinner className="page__spinner" />
                         </div> :
@@ -93,6 +93,7 @@ const SimilarBooks = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-20">
                                 {
                                     similarBooks?.map((book: RecordModel) => (
+                                        book.id !== bookDetails.id &&
                                         <div key={book.id} className="p-5 rounded-md border border-theme">
                                             <div className="flex flex-col lg:flex-row gap-5">
                                                 <Link href={`/book/${book.id}`} className="translate-y-[-25%]">
