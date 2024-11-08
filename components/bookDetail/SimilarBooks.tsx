@@ -25,8 +25,9 @@ const SimilarBooks = () => {
     const emptyFavouriteBooks = useBookStore((state: any) => state.emptyFavouriteBooks);
 
     const getSimilarBooks = async (page: number) => {
-        if (bookDetails.genres) {
+        updateIsSimilarBookFetching(true);
 
+        if (bookDetails.genres) {
             let genreBookIds = new Set();
 
             for (let i = 0; i < bookDetails.genres.length; i++) {
