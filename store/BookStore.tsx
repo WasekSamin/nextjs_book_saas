@@ -159,7 +159,8 @@ export const useBookStore = create((set) => ({
     },
     emptySimilarBooks: () => {
         set(() => ({
-            similarBooks: []
+            similarBooks: [],
+            isSimilarBookFetching: true,
         }))
     },
 

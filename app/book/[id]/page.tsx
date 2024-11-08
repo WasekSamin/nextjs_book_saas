@@ -21,6 +21,7 @@ const BookDetail = () => {
     const emptyBookDetails = useBookStore((state: any) => state.emptyBookDetails);
     const updatePurchasedBookDetails = useBookStore((state: any) => state.updatePurchasedBookDetails);
     const emptyPurchasedBookDetails = useBookStore((state: any) => state.emptyPurchasedBookDetails);
+    const emptySimilarBooks = useBookStore((state: any) => state.emptySimilarBooks);
 
     // Review store
     const emptyBookReviewDetails = useReviewStore((state: any) => state.emptyBookReviewDetails);
@@ -45,6 +46,7 @@ const BookDetail = () => {
 
         return () => {
             emptyBookDetails();
+            emptySimilarBooks();
             emptyBookReviewDetails();
             emptyBookReview();
             emptyPurchasedBookDetails();
