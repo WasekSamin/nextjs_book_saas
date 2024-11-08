@@ -9,7 +9,8 @@ export const fetchBookReviews = async({page, bookId}: {page: number, bookId: str
         const reviewList = await pb.collection('feedbacks').getList(page, PAGINATION_LIMIT, {
             filter: `book.id="${bookId}" && is_hidden=${false}`,
             expand: "user",
-            sort: "-created"
+            sort: "-created",
+            requestKey: null
         });
 
         return reviewList;

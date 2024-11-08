@@ -40,17 +40,20 @@ export const fetchBooks = async({page, genreId, authorId}: {page: number, genreI
                 filter: `genres~"${genreId}"`,
                 expand: "authors",
                 sort: "-created",
+                requestKey: null
             });
         } else if (authorId) {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `authors~"${authorId}"`,
                 expand: "authors",
                 sort: "-created",
+                requestKey: null
             });
         } else {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 sort: "-created",
-                expand: "authors"
+                expand: "authors",
+                requestKey: null
             });
         }
 
@@ -69,7 +72,8 @@ export const searchBooks = async({page, searchText}: {page: number, searchText: 
         const bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
             filter: `id~"${searchText}" || title~"${searchText}"`,
             expand: "authors",
-            sort: "-created"
+            sort: "-created",
+            requestKey: null
         });
 
         return bookList;
@@ -83,7 +87,8 @@ export const fetchFavouriteBooks = async({page}: {page: number}) => {
         const favBookList: ListResult<RecordModel> = await pb.collection('favourite_books').getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
-            sort: "-created"
+            sort: "-created",
+            requestKey: null
         });
 
         return favBookList;
@@ -97,7 +102,8 @@ export const fetchPurchasedBooks = async({page}: {page: number}) => {
         const purchasedBookList: ListResult<RecordModel> = await pb.collection("purchased_books").getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
-            sort: "-created"
+            sort: "-created",
+            requestKey: null
         })
 
         return purchasedBookList;

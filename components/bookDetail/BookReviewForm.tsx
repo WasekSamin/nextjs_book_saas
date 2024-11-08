@@ -181,7 +181,8 @@ const BookReviewForm = () => {
 
         try {
             const reviewRecord = await pb.collection('feedbacks').update(bookReviewDetails.id, formData, {
-                expand: "user"
+                expand: "user",
+                requestKey: null
             });
 
             if (reviewRecord) {
@@ -225,7 +226,8 @@ const BookReviewForm = () => {
 
         try {
             const reviewRecord = await pb.collection('feedbacks').create(formData, {
-                expand: "user"
+                expand: "user",
+                requestKey: null
             });
 
             if (reviewRecord) {

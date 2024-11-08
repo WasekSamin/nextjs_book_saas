@@ -146,7 +146,8 @@ const PurchaseBookModal = () => {
 
         try {
             const purchasedRecord = await pb.collection('checkouts').create(formData, {
-                expand: "book"
+                expand: "book",
+                requestKey: null
             });
 
             if (purchasedRecord) {
