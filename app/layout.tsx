@@ -8,11 +8,9 @@ import { useEffect } from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import { useThemeStore } from "@/store/ThemeStore";
 import { ToastContainer } from "react-toastify";
-import { useUserStore } from "@/store/UserStore";
-import { pb } from "@/store/PocketbaseStore";
 import { usePageStore } from "@/store/PageStore";
 import { usePathname, useRouter } from "next/navigation";
-import { ImSpinner } from "react-icons/im";
+import { pb } from "@/store/PocketbaseStore";
 
 export const nunito = Nunito({
   weight: ['400', '500', '600'], // Define the weights you need
@@ -26,9 +24,17 @@ export const nunito = Nunito({
 // };
 
 // Pathnames that do not need checking
+
+const MIDDLEWARE_PATHNAMES = [
+  "/profile",
+  "/purchased-books",
+  "/favourite-books"
+]
 const PATHNAMES_NO_CHECK = [
+  "/",
   "/login",
-  "/help"
+  "/help",
+  "/"
 ]
 
 export default function RootLayout({
@@ -56,14 +62,20 @@ export default function RootLayout({
     }
   }, [])
 
-  useEffect(() => {
-    if (!PATHNAMES_NO_CHECK.includes(pathname)) {
+  const checkPageMiddlewares = () => {
+    if (MIDDLEWARE_PATHNAMES.includes(pathname)) {
       if (pb?.authStore?.model) {
         updateIsPageLoading(false);
       } else {
         router.push("/login");
       }
+    } else {
+      updateIsPageLoading(false);
     }
+  }
+
+  useEffect(() => {
+    checkPageMiddlewares();
 
     return () => {
       updateIsPageLoading(true);

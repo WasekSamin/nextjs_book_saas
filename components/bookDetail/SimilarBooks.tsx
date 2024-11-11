@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { RecordModel } from "pocketbase"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { FaHeart, FaRegHeart, FaRegStar, FaStar } from "react-icons/fa"
 import { ImSpinner } from "react-icons/im"
 import { Tooltip } from "react-tooltip"
@@ -24,8 +24,25 @@ const SimilarBooks = () => {
     const updateIsFavouriteBookSubmitting = useBookStore((state: any) => state.updateIsFavouriteBookSubmitting);
     const emptyFavouriteBooks = useBookStore((state: any) => state.emptyFavouriteBooks);
 
+    const similarBookControllerRef = useRef<AbortController>();
+    const favouriteBookControllerRef = useRef<AbortController>();
+
     const getSimilarBooks = async (page: number) => {
         updateIsSimilarBookFetching(true);
+
+        if (similarBookControllerRef.current) {
+            similarBookControllerRef.current.abort();
+        }
+
+        similarBookControllerRef.current = new AbortController();
+        const signal = similarBookControllerRef.current.signal;
+
+        if (favouriteBookControllerRef.current) {
+            favouriteBookControllerRef.current.abort();
+        }
+
+        favouriteBookControllerRef.current = new AbortController();
+        const favouriteBookSignal = favouriteBookControllerRef.current.signal;
 
         if (bookDetails.genres) {
             let genreBookIds = new Set();
@@ -33,7 +50,7 @@ const SimilarBooks = () => {
             for (let i = 0; i < bookDetails.genres.length; i++) {
                 const genre: RecordModel = bookDetails.genres[i];
 
-                const { items: books }: any = await fetchBooks({ page: page, genreId: genre.id });
+                const { items: books }: any = await fetchBooks({ page: page, genreId: genre.id, signal: signal });
 
                 if (books) {
                     for (let j = 0; j < books.length; j++) {
@@ -44,14 +61,17 @@ const SimilarBooks = () => {
                         if (!genreBookIds.has(book.id)) {
                             genreBookIds.add(book.id);
 
-                            const isFav: boolean = await isFavouriteBook(book.id);
-                            book.is_favourite = isFav;
+                            if (pb?.authStore?.model) {
+                                const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: favouriteBookSignal});
+                                book.is_favourite = isFav;
+                            }
+
                             const { authors }: any = book?.expand;
-    
+
                             if (authors) {
                                 book.authors = authors;
                             }
-    
+
                             addSimilarBooks(book);
                         }
                     }
@@ -65,9 +85,17 @@ const SimilarBooks = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
+        if (favouriteBookControllerRef.current) {
+            favouriteBookControllerRef.current.abort();
+        }
+
+        favouriteBookControllerRef.current = new AbortController();
+        const signal = favouriteBookControllerRef.current.signal;
+
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav
+            isFav: isFav,
+            signal: signal
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -101,17 +129,20 @@ const SimilarBooks = () => {
                                                     <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
                                                 </Link>
                                                 <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
-                                                    <div className="lg:w-full flex justify-end order-2 lg:order-1">
-                                                        <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
-                                                            {
-                                                                book.is_favourite ?
-                                                                    <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
-                                                                    :
-                                                                    <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
-                                                            }
-                                                        </button>
-                                                        <Tooltip id={`fav__book-${book.id}`} className="custom__tooltip" />
-                                                    </div>
+                                                    {
+                                                        pb?.authStore?.model &&
+                                                        <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                            <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
+                                                                {
+                                                                    book.is_favourite ?
+                                                                        <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
+                                                                        :
+                                                                        <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
+                                                                }
+                                                            </button>
+                                                            <Tooltip id={`fav__book-${book.id}`} className="custom__tooltip" />
+                                                        </div>
+                                                    }
 
                                                     <div className="flex flex-col gap-y-5 order-1 lg:order-2">
                                                         <Link href={`/book/${book.id}`} className="w-fit text-base md:text-lg font-semibold">{book.title}</Link>

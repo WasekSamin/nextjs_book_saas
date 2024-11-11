@@ -12,6 +12,7 @@ import { updateBookFavouriteMode } from "@/utils/favouriteBookFunc";
 import { RecordModel } from "pocketbase";
 import { AnimatePresence } from "framer-motion";
 import PurchaseBookModal from "./PurchaseBookModal";
+import { useRef } from "react";
 
 const BookDetails = () => {
     // Book store
@@ -24,12 +25,22 @@ const BookDetails = () => {
     const showPurchasedBookModal = useBookStore((state: any) => state.showPurchasedBookModal);
     const updateShowPurchasedBookModal = useBookStore((state: any) => state.updateShowPurchasedBookModal);
 
+    const controllerRef = useRef<AbortController>();
+
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav
+            isFav: isFav,
+            signal: signal
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -76,17 +87,20 @@ const BookDetails = () => {
                                             <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
                                         </div>
                                         <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
-                                            <div className="lg:w-full flex justify-end order-2 lg:order-1">
-                                                <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
-                                                    {
-                                                        book.is_favourite ?
-                                                            <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
-                                                            :
-                                                            <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
-                                                    }
-                                                </button>
-                                                <Tooltip id={`fav__book-${book.id}`} className="custom__tooltip" />
-                                            </div>
+                                            {
+                                                pb?.authStore?.model &&
+                                                <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                    <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
+                                                        {
+                                                            book.is_favourite ?
+                                                                <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
+                                                                :
+                                                                <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
+                                                        }
+                                                    </button>
+                                                    <Tooltip id={`fav__book-${book.id}`} className="custom__tooltip" />
+                                                </div>
+                                            }
 
                                             <div className="w-full flex flex-col gap-y-5 order-1 lg:order-2">
                                                 <p className="w-fit text-base md:text-lg font-semibold">{book.title}</p>

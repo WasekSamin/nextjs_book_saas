@@ -9,8 +9,12 @@ import { RiMenu2Line } from "react-icons/ri";
 import MobileNavSidebar from "./MobileNavSidebar";
 import { AnimatePresence } from "framer-motion";
 import { pb } from "@/store/PocketbaseStore";
+import { usePathname } from "next/navigation";
+import { IoMdLogIn } from "react-icons/io";
 
 const MobileNavbar = () => {
+    const pathname = usePathname();
+
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
     const toggleDarkMode = useThemeStore((state: any) => state.toggleDarkMode);
     const updateShowBookSearchModal = useNavStore((state: any) => state.updateShowBookSearchModal);
@@ -38,12 +42,19 @@ const MobileNavbar = () => {
                     <Link href="/" className="whitespace-nowrap text-xl font-semibold italic">E-Book</Link>
                 </div>
                 <div className="flex items-center gap-x-5">
-                    <button type="button" onClick={() => toggleBookModalSearch(true)} className="p-2 theme-block rounded-full">
-                        <IoSearch className={`text-xl ${isDarkMode ? "" : "text-stone-500/80"}`} />
-                    </button>
                     {
-                        pb?.authStore?.model &&
-                        <NavProfile />
+                        pathname !== "/login" &&
+                        <button type="button" onClick={() => toggleBookModalSearch(true)} className="p-2 theme-block rounded-full">
+                            <IoSearch className={`text-xl ${isDarkMode ? "" : "text-stone-500/80"}`} />
+                        </button>
+                    }
+
+                    {
+                        pb?.authStore?.model ?
+                            <NavProfile /> :
+                            <Link href="/login" className="flex items-center gap-x-1 underline">
+                                <IoMdLogIn className="text-base" /> Sign In
+                            </Link>
                     }
                     <DarkModeSwitch
                         checked={isDarkMode}

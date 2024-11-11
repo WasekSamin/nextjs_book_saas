@@ -5,16 +5,19 @@ import { isFavouriteBook } from '@/utils/favouriteBookFunc';
 
 const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
 
-export const fetchBookDetail = async(bookId: string) => {
+export const fetchBookDetail = async({bookId, signal}: {bookId: string, signal: AbortSignal }) => {
     try {
         const book = await pb.collection('books').getOne(bookId, {
             expand: 'authors, genres',
+            signal: signal
         });
 
         if (book) {
-            const isFav: boolean = await isFavouriteBook(book.id);
+            if (pb?.authStore?.model) {
+                const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: signal});
+                book.is_favourite = isFav;
+            }
 
-            book.is_favourite = isFav;
             const {authors, genres}: any = book?.expand;
 
             if (authors) {
@@ -31,7 +34,7 @@ export const fetchBookDetail = async(bookId: string) => {
     }
 }
 
-export const fetchBooks = async({page, genreId, authorId}: {page: number, genreId?: string, authorId?: string}) => {
+export const fetchBooks = async({page, genreId, authorId, signal}: {page: number, genreId?: string, authorId?: string, signal: AbortSignal}) => {
     let bookList: ListResult<RecordModel>;
 
     try {
@@ -40,20 +43,23 @@ export const fetchBooks = async({page, genreId, authorId}: {page: number, genreI
                 filter: `genres~"${genreId}"`,
                 expand: "authors",
                 sort: "-created",
-                requestKey: null
+                requestKey: null,
+                signal: signal
             });
         } else if (authorId) {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `authors~"${authorId}"`,
                 expand: "authors",
                 sort: "-created",
-                requestKey: null
+                requestKey: null,
+                signal: signal
             });
         } else {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 sort: "-created",
                 expand: "authors",
-                requestKey: null
+                requestKey: null,
+                signal: signal
             });
         }
 
@@ -63,7 +69,7 @@ export const fetchBooks = async({page, genreId, authorId}: {page: number, genreI
     }
 }
 
-export const searchBooks = async({page, searchText}: {page: number, searchText: string}) => {
+export const searchBooks = async({page, searchText, signal}: {page: number, searchText: string, signal: AbortSignal}) => {
     if (searchText === "") {
         return [];
     }
@@ -73,7 +79,8 @@ export const searchBooks = async({page, searchText}: {page: number, searchText: 
             filter: `id~"${searchText}" || title~"${searchText}"`,
             expand: "authors",
             sort: "-created",
-            requestKey: null
+            requestKey: null,
+            signal: signal
         });
 
         return bookList;
@@ -82,13 +89,14 @@ export const searchBooks = async({page, searchText}: {page: number, searchText: 
     }
 }
 
-export const fetchFavouriteBooks = async({page}: {page: number}) => {
+export const fetchFavouriteBooks = async({page, signal}: {page: number, signal: AbortSignal}) => {
     try {
         const favBookList: ListResult<RecordModel> = await pb.collection('favourite_books').getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
             sort: "-created",
-            requestKey: null
+            requestKey: null,
+            signal: signal
         });
 
         return favBookList;
@@ -97,13 +105,14 @@ export const fetchFavouriteBooks = async({page}: {page: number}) => {
     }
 }
 
-export const fetchPurchasedBooks = async({page}: {page: number}) => {
+export const fetchPurchasedBooks = async({page, signal}: {page: number, signal: AbortSignal}) => {
     try {
         const purchasedBookList: ListResult<RecordModel> = await pb.collection("purchased_books").getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
             sort: "-created",
-            requestKey: null
+            requestKey: null,
+            signal: signal
         })
 
         return purchasedBookList;
@@ -112,9 +121,11 @@ export const fetchPurchasedBooks = async({page}: {page: number}) => {
     }
 }
 
-export const fetchPurchasedBook = async(bookId: string) => {
+export const fetchPurchasedBook = async({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
     try {
-        const bookRecord: RecordModel = await pb.collection("purchased_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`);
+        const bookRecord: RecordModel = await pb.collection("purchased_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`, {
+            signal: signal
+        });
         return bookRecord;
     } catch(err) {
         return null;
@@ -130,9 +141,7 @@ export const useBookStore = create((set) => ({
         }))
     },
     bookDetails: null,
-    getBookDetails: async(bookId: string) => {
-        const book = await fetchBookDetail(bookId);
-
+    updateBookDetails: (book: RecordModel) => {
         set(() => ({
             bookDetails: book
         }))

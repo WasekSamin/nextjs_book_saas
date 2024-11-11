@@ -4,13 +4,14 @@ import { pb } from "./PocketbaseStore";
 
 const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
 
-export const fetchBookReviews = async({page, bookId}: {page: number, bookId: string}) => {
+export const fetchBookReviews = async({page, bookId, signal}: {page: number, bookId: string, signal: AbortSignal}) => {
     try {
         const reviewList = await pb.collection('feedbacks').getList(page, PAGINATION_LIMIT, {
             filter: `book.id="${bookId}" && is_hidden=${false}`,
             expand: "user",
             sort: "-created",
-            requestKey: null
+            requestKey: null,
+            signal: signal
         });
 
         return reviewList;

@@ -7,7 +7,8 @@ const fetchUserDetails = async () => {
     try {
         const userList = await pb.collection('users').getList(1, 1, {
             sort: "-created",
-            expand: "profile"
+            expand: "profile",
+            requestKey: null
         });
 
         const { items } = userList;

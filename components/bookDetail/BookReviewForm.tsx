@@ -41,6 +41,8 @@ const BookReviewForm = () => {
     const bookReviewDetails = useReviewStore((state: any) => state.bookReviewDetails);
     const updateBookReviewDetails = useReviewStore((state: any) => state.updateBookReviewDetails);
 
+    const controllerRef = useRef<AbortController>();
+
     // Book store
     const bookDetails = useBookStore((state: any) => state.bookDetails);
 
@@ -159,20 +161,29 @@ const BookReviewForm = () => {
             return;
         }
 
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         if (!bookReviewDetails) {
             await createBookReview({
                 rating: rating,
-                msg: reviewMessage
+                msg: reviewMessage,
+                signal: signal
             });
         } else {
             await editBookReview({
                 rating: rating,
-                msg: reviewMessage
+                msg: reviewMessage,
+                signal: signal
             });
         }
     }
 
-    const editBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
+    const editBookReview = async ({ rating, msg, signal }: { rating: number, msg: string, signal: AbortSignal }) => {
         const formData = {
             rating: rating,
             review_message: msg,
@@ -182,11 +193,11 @@ const BookReviewForm = () => {
         try {
             const reviewRecord = await pb.collection('feedbacks').update(bookReviewDetails.id, formData, {
                 expand: "user",
-                requestKey: null
+                signal: signal
             });
 
             if (reviewRecord) {
-                const {user}: any = reviewRecord?.expand;
+                const { user }: any = reviewRecord?.expand;
 
                 if (user) {
                     reviewRecord["user"] = user;
@@ -216,7 +227,7 @@ const BookReviewForm = () => {
         }
     }
 
-    const createBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
+    const createBookReview = async ({ rating, msg, signal }: { rating: number, msg: string, signal: AbortSignal }) => {
         const formData = {
             rating: rating,
             review_message: msg,
@@ -227,7 +238,7 @@ const BookReviewForm = () => {
         try {
             const reviewRecord = await pb.collection('feedbacks').create(formData, {
                 expand: "user",
-                requestKey: null
+                signal: signal
             });
 
             if (reviewRecord) {
@@ -330,7 +341,7 @@ const BookReviewForm = () => {
                             <div>
                                 <button onClick={handleClearRating} className="flex items-center text-danger justify-center gap-x-1">
                                     <IoCloseCircle />
-                                    Clear Filter
+                                    Clear Rating
                                 </button>
                             </div>
                         }
@@ -345,16 +356,19 @@ const BookReviewForm = () => {
                 <textarea onChange={handleFormInputChange} rows={3} ref={reviewMessageRef} id="message" name="message" className="focus:outline-none px-3 py-2 rounded-md input__element focus:ring-2 focus:ring-indigo-400" placeholder="Your review"></textarea>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <button disabled={isBookReviewSubmitting} type="submit" className={`w-full sm:w-fit flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isBookReviewSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
-                        {
-                            bookReviewDetails ? "Update Comment" : "Comment"
-                        }
-                        {
-                            isBookReviewSubmitting ?
-                                <ImSpinner9 className="btn__spinner" /> :
-                                <MdOutlineRocketLaunch />
-                        }
-                    </button>
+                    {
+                        pb?.authStore?.model ?
+                            <button disabled={isBookReviewSubmitting} type="submit" className={`w-full sm:w-fit flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isBookReviewSubmitting ? "bg-indigo-400" : "bg-indigo-500 hover:bg-indigo-600"} transition-colors duration-200 ease-linear`}>
+                                {
+                                    bookReviewDetails ? "Update Comment" : "Comment"
+                                }
+                                {
+                                    isBookReviewSubmitting ?
+                                        <ImSpinner9 className="btn__spinner" /> :
+                                        <MdOutlineRocketLaunch />
+                                }
+                            </button> : <p>You need to login to post a review!</p>
+                    }
                     {
                         bookReviewDetails &&
                         <button onClick={cancelReviewUpdate} type="button" className={`w-full sm:w-fit flex gap-x-1.5 items-center justify-center px-5 py-2 rounded-md text-light ${isBookReviewSubmitting ? "bg-rose-400" : "bg-rose-500 hover:bg-rose-600"} transition-colors duration-200 ease-linear`}>

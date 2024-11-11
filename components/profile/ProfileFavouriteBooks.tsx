@@ -40,6 +40,9 @@ const ProfileFavouriteBooks = () => {
         nextBtn: true
     });
 
+    const favouriteBookListControllerRef = useRef<AbortController>();
+    const favouriteBookControllerRef = useRef<AbortController>();
+
     const handleSlidePrevSlide = () => {
         if (favouriteBookSwiperRef.current) {
             if (!favouriteBookSwiperRef.current.isEnd) {
@@ -77,7 +80,14 @@ const ProfileFavouriteBooks = () => {
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
 
-        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
+        if (favouriteBookListControllerRef.current) {
+            favouriteBookListControllerRef.current.abort();
+        }
+
+        favouriteBookListControllerRef.current = new AbortController();
+        const signal = favouriteBookListControllerRef.current.signal;
+
+        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page, signal: signal });
 
         if (favBooks) {
             for (let i = 0; i < favBooks.length; i++) {
@@ -113,9 +123,17 @@ const ProfileFavouriteBooks = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
+        if (favouriteBookControllerRef.current) {
+            favouriteBookControllerRef.current.abort();
+        }
+
+        favouriteBookControllerRef.current = new AbortController();
+        const signal = favouriteBookControllerRef.current.signal;
+
         const favouriteBook: RecordModel = await updateBookFavouriteMode({
             book: book,
-            isFav: isFav
+            isFav: isFav,
+            signal: signal
         });
 
         removeFavouriteBook(favouriteBook);

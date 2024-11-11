@@ -18,6 +18,8 @@ const GenreModalSearch = () => {
 
     const genreSearchRef = useRef<HTMLFormElement | null>(null);
     const genreInputRef = useRef<HTMLInputElement | null>(null);
+    
+    const controllerRef = useRef<AbortController>();
 
     const searchGenres = async() => {
         updateIsFetchingGenre(true);
@@ -26,7 +28,14 @@ const GenreModalSearch = () => {
         const searchText = genreInputRef.current?.value?.trim() ?? "";
         updateSearchGenreText(searchText);
 
-        const genres: RecordModel[] = await fetchAllGenres({searchText: searchText});
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
+        const genres: RecordModel[] = await fetchAllGenres({searchText: searchText, signal: signal});
 
         if (genres) {
             for (let i=0; i<genres.length; i++) {

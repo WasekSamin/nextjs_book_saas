@@ -15,6 +15,8 @@ const SubscriberFooter = () => {
     const emailRef = useRef<HTMLInputElement | null>(null);
     const subscriberFormRef = useRef<HTMLFormElement | null>(null);
 
+    const controllerRef = useRef<AbortController>();
+
     const handleFormError = ({ name, isError }: { name: string, isError: boolean }) => {
         switch (name) {
             case "email":
@@ -69,9 +71,11 @@ const SubscriberFooter = () => {
         });
     }
 
-    const isSubscriberExist = async (email: string) => {
+    const isSubscriberExist = async ({email, signal}: {email: string, signal: AbortSignal}) => {
         try {
-            const subRecord = await pb.collection('subscribers').getFirstListItem(`email="${email}"`);
+            const subRecord = await pb.collection('subscribers').getFirstListItem(`email="${email}"`, {
+                signal: signal
+            });
             return subRecord ? true : false;
         } catch (err) {
             return false
@@ -81,8 +85,15 @@ const SubscriberFooter = () => {
     const addSubscriber = async ({
         email
     }: { email: string }) => {
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         // Check if subscriber already exist
-        const isSubbed = await isSubscriberExist(email);
+        const isSubbed = await isSubscriberExist({email: email, signal: signal});
 
         if (isSubbed) {
             makeToast({
@@ -100,7 +111,9 @@ const SubscriberFooter = () => {
         }
 
         try {
-            const subRecord = await pb.collection('subscribers').create(formData);
+            const subRecord = await pb.collection('subscribers').create(formData, {
+                signal: signal
+            });
 
             if (subRecord) {
                 makeToast({

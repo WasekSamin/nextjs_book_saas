@@ -10,8 +10,14 @@ import { AnimatePresence } from "framer-motion";
 import ProfileFavouriteBooks from "@/components/profile/ProfileFavouriteBooks";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { useEffect } from "react";
+import { usePageStore } from "@/store/PageStore";
+import { ImSpinner } from "react-icons/im";
 
 const Profile = () => {
+    // Page store
+    const isPageLoading = usePageStore((state: any) => state.isPageLoading);
+
+    // User store
     const isUpdateProfilePic = useUserStore((state: any) => state.isUpdateProfilePic);
     const toggleIsUpdateProfilePic = useUserStore((state: any) => state.toggleIsUpdateProfilePic);
     const updateIsUserSubmitting = useUserStore((state: any) => state.updateIsUserSubmitting);
@@ -24,6 +30,10 @@ const Profile = () => {
     }, [])
 
     return (
+        isPageLoading ?
+      <div className="w-full h-svh flex items-center justify-center">
+        <ImSpinner className="page__spinner" />
+      </div> : 
         <>
             <Navbar />
 

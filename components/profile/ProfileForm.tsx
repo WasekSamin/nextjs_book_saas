@@ -15,31 +15,49 @@ const ProfileForm = () => {
 
     const nameRef = useRef<HTMLInputElement | null>(null);
 
+    const controllerRef = useRef<AbortController>();
+
     const handleProfileUpdate = async (e: any) => {
         e.preventDefault();
 
         updateIsUserSubmitting(true);
 
+        let isErrorExist = false;
+
         const name = nameRef.current?.value?.trim() ?? "";
 
         if (name === "") {
+            isErrorExist = true;
             handleFormError({name: "name", isError: true});
+        }
+
+        if (isErrorExist) {
             updateIsUserSubmitting(false);
             return;
         }
 
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         await editUser({
             name: name,
+            signal: signal
         });
     }
 
-    const editUser = async ({name}: {name: string}) => {
+    const editUser = async ({name, signal}: {name: string, signal: AbortSignal}) => {
         const formData = {
             name: name
         }
 
         try {
-            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData, {
+                signal: signal
+            });
 
             if (userRecord) {
                 makeToast({

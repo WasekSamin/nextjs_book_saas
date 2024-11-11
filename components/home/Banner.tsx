@@ -16,54 +16,44 @@ import { RichTextElement } from '@/utils/RichTextElement';
 
 import "@/css/home/Banner.css";
 import { FaRegStar, FaStar } from 'react-icons/fa';
-import { useEffect } from 'react';
-import { makeToast } from '@/utils/toastMesage';
-import { useThemeStore } from '@/store/ThemeStore';
-import { useBookStore } from '@/store/BookStore';
+import { useEffect, useRef } from 'react';
+import { fetchBooks, useBookStore } from '@/store/BookStore';
 import { pb } from '@/store/PocketbaseStore';
 import { ImSpinner } from 'react-icons/im';
 import { RecordModel } from 'pocketbase';
 
 const Banner = () => {
-    const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+    const controllerRef = useRef<AbortController>();
+
     const bannerBooks = useBookStore((state: any) => state.bannerBooks);
     const addBannerBook = useBookStore((state: any) => state.addBannerBook);
     const reRenderBannerBooks = useBookStore((state: any) => state.reRenderBannerBooks);
     const updateReRenderBannerBooks = useBookStore((state: any) => state.updateReRenderBannerBooks);
-    const emptyBannerBooks = useBookStore((state: any) => state.emptyBannerBooks);
 
-    const fetchBannerBooks = async () => {
-        try {
-            const bannerList = await pb.collection('books').getList(1, 20, {
-                sort: "-created",
-                requestKey: null
-            });
+    const fetchBannerBooks = async (page: number) => {
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
 
-            const { items: banners } = bannerList;
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+        
+        const {items: books}: any = await fetchBooks({page: page, signal: signal});
 
-            if (banners) {
-                for (let i=0; i<banners.length; i++) {
-                    const book: RecordModel = banners[i];
+        if (books) {
+            for (let i=0; i<books.length; i++) {
+                const book: RecordModel = books[i];
 
-                    addBannerBook(book);
-                }
+                addBannerBook(book);
             }
 
             updateReRenderBannerBooks(false);
-        } catch (err) {
-            makeToast({
-                toastType: "error",
-                msg: "Failed to fetch banners!",
-                isDark: isDarkMode
-            });
-            updateReRenderBannerBooks(true);
-            emptyBannerBooks();
         }
     }
 
     useEffect(() => {
         if (reRenderBannerBooks) {
-            fetchBannerBooks();
+            fetchBannerBooks(1);
         }
     }, [])
 

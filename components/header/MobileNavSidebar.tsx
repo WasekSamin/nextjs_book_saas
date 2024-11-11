@@ -1,10 +1,11 @@
 import { NAV_LINKS, useNavStore } from "@/store/NavStore";
 import { useThemeStore } from "@/store/ThemeStore"
 import Link from "next/link";
-import { IoIosLogOut } from "react-icons/io";
+import { IoIosLogOut, IoMdLogIn } from "react-icons/io";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { pb } from "@/store/PocketbaseStore";
 
 const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: any) => {
     const pathname = usePathname();
@@ -64,9 +65,15 @@ const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: an
                     </div>
 
                     <li className="px-5">
+                        {
+                            pb?.authStore?.model ? 
                         <button type="button" className="px-3 py-2 bg-rose-500 text-white rounded-md flex items-center justify-center gap-x-3 w-full text-hover:primary transition-colors duration-200 ease-linear">
                             <IoIosLogOut /> <span>Logout</span>
-                        </button>
+                        </button> : 
+                        <Link href="/login" className="px-3 py-2 bg-indigo-500 text-white rounded-md flex items-center justify-center gap-x-1 w-full text-hover:primary transition-colors duration-200 ease-linear">
+                            <IoMdLogIn className="text-base" /> Sign In
+                        </Link>
+                        }
                     </li>
                 </ul>
             </motion.div>

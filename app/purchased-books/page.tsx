@@ -4,19 +4,23 @@ import Footer from '@/components/footer/Footer'
 import Navbar from '@/components/header/Navbar'
 import { BOOKS } from '@/data'
 import { fetchPurchasedBooks, useBookStore } from '@/store/BookStore';
+import { usePageStore } from '@/store/PageStore';
 import { pb } from '@/store/PocketbaseStore';
 import { isFavouriteBook, updateBookFavouriteMode } from '@/utils/favouriteBookFunc';
 import { RichTextElement } from '@/utils/RichTextElement'
 import Image from 'next/image'
 import Link from 'next/link'
 import { RecordModel } from 'pocketbase';
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { FaHeart, FaRegHeart, FaRegStar, FaStar } from 'react-icons/fa'
 import { ImSpinner } from 'react-icons/im';
 import { useInView } from 'react-intersection-observer';
 import { Tooltip } from 'react-tooltip'
 
 const PurchasedBooks = () => {
+    // Page store
+    const isPageLoading = usePageStore((state: any) => state.isPageLoading);
+
     // Book store
     const purchasedBooks = useBookStore((state: any) => state.purchasedBooks);
     const addPurchasedBook = useBookStore((state: any) => state.addPurchasedBook);
@@ -36,10 +40,27 @@ const PurchasedBooks = () => {
         threshold: 0,
     });
 
+    const purchasedBookControllerRef = useRef<AbortController>();
+    const favouriteBookControllerRef = useRef<AbortController>();
+
     const getPurchasedBooks = async (page: number) => {
         updateIsPurcasedBooksFetching(true);
 
-        const { items: purchasedBookList }: any = await fetchPurchasedBooks({ page: page });
+        if (purchasedBookControllerRef.current) {
+            purchasedBookControllerRef.current.abort();
+        }
+
+        purchasedBookControllerRef.current = new AbortController();
+        const signal = purchasedBookControllerRef.current.signal;
+
+        if (favouriteBookControllerRef.current) {
+            favouriteBookControllerRef.current.abort();
+        }
+
+        favouriteBookControllerRef.current = new AbortController();
+        const favouriteBookSignal = favouriteBookControllerRef.current.signal;
+
+        const { items: purchasedBookList }: any = await fetchPurchasedBooks({ page: page, signal: signal });
 
         if (purchasedBookList) {
             for (let i = 0; i < purchasedBookList.length; i++) {
@@ -48,8 +69,11 @@ const PurchasedBooks = () => {
                 const { book }: any = purchasedBook?.expand;
 
                 if (book) {
-                    const isFav: boolean = await isFavouriteBook(book.id);
-                    book.is_favourite = isFav;
+                    if (pb?.authStore?.model) {
+                        const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: favouriteBookSignal});
+                        book.is_favourite = isFav;
+                    }
+
                     const { authors }: any = book?.expand;
 
                     if (authors) {
@@ -72,9 +96,17 @@ const PurchasedBooks = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
+        if (favouriteBookControllerRef.current) {
+            favouriteBookControllerRef.current.abort();
+        }
+
+        favouriteBookControllerRef.current = new AbortController();
+        const signal = favouriteBookControllerRef.current.signal;
+
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav
+            isFav: isFav,
+            signal: signal
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -92,97 +124,104 @@ const PurchasedBooks = () => {
     }, [purchasedBookInView])
 
     return (
-        <>
-            <Navbar />
+        isPageLoading ?
+            <div className="w-full h-svh flex items-center justify-center">
+                <ImSpinner className="page__spinner" />
+            </div> :
+            <>
+                <Navbar />
 
-            <div className="base-layout container mx-auto">
-                <div className='flex flex-col gap-y-5'>
-                    <h5 className='font-semibold text-xl md:text-2xl'>Purchased Books</h5>
+                <div className="base-layout container mx-auto">
+                    <div className='flex flex-col gap-y-5'>
+                        <h5 className='font-semibold text-xl md:text-2xl'>Purchased Books</h5>
 
-                    <div className='mt-20'>
-                        {
-                            reRenderPurchasedBooks ?
-                                <div className="w-full flex items-center justify-center">
-                                    <ImSpinner className="page__spinner" />
-                                </div> :
-                                purchasedBooks?.length > 0 ?
-                                    <>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-20">
-                                            {
-                                                purchasedBooks.map((book: RecordModel, index: number) => (
-                                                    <div key={book.id} className="p-5 rounded-md border border-theme">
-                                                        <div className="flex flex-col lg:flex-row gap-5">
-                                                            <Link href={`/book/${book.id}`} className="translate-y-[-25%]">
-                                                                <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
-                                                            </Link>
-                                                            <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
-                                                                <div className="lg:w-full flex justify-end order-2 lg:order-1">
-                                                                    <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
-                                                                        {
-                                                                            book.is_favourite ?
-                                                                                <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
-                                                                                :
-                                                                                <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
-                                                                        }
-                                                                    </button>
-                                                                    <Tooltip id={`purchased__book-${book.id}`} className="custom__tooltip" />
-                                                                </div>
-
-                                                                <div className="flex flex-col gap-y-5 order-1 lg:order-2">
-                                                                    <Link href={`/book/${book.id}`} className="w-fit text-base md:text-lg font-semibold">{book.title}</Link>
-                                                                    <div className="flex flex-col gap-y-3">
-                                                                        {
-                                                                            book.author &&
-                                                                            <Link href={`/author/${book.author.id}`} className="w-fit font-medium"><span className='font-normal'>By</span> {book.author.name}</Link>
-                                                                        }
-                                                                        <div className='flex items-center gap-x-1 text-yellow-400 text-base'>
-                                                                            {
-                                                                                book.rating >= 1 ? <FaStar /> : <FaRegStar />
-                                                                            }
-                                                                            {
-                                                                                book.rating >= 2 ? <FaStar /> : <FaRegStar />
-                                                                            }
-                                                                            {
-                                                                                book.rating >= 3 ? <FaStar /> : <FaRegStar />
-                                                                            }
-                                                                            {
-                                                                                book.rating >= 4 ? <FaStar /> : <FaRegStar />
-                                                                            }
-                                                                            {
-                                                                                book.rating >= 5 ? <FaStar /> : <FaRegStar />
-                                                                            }
+                        <div className='mt-20'>
+                            {
+                                reRenderPurchasedBooks ?
+                                    <div className="w-full flex items-center justify-center">
+                                        <ImSpinner className="page__spinner" />
+                                    </div> :
+                                    purchasedBooks?.length > 0 ?
+                                        <>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-20">
+                                                {
+                                                    purchasedBooks.map((book: RecordModel, index: number) => (
+                                                        <div key={book.id} className="p-5 rounded-md border border-theme">
+                                                            <div className="flex flex-col lg:flex-row gap-5">
+                                                                <Link href={`/book/${book.id}`} className="translate-y-[-25%]">
+                                                                    <Image src={pb.files.getUrl(book, book.thumbnail, { 'thumb': '180x260' })} width={180} height={260} className='min-w-full w-full lg:w-[180px] lg:min-w-[180px] h-[260px] min-h-[260px] object-contain lg:object-cover' alt={`${book.title} Image`} />
+                                                                </Link>
+                                                                <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
+                                                                    {
+                                                                        pb?.authStore?.model &&
+                                                                        <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                                            <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
+                                                                                {
+                                                                                    book.is_favourite ?
+                                                                                        <FaHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Remove from favourite" className="text-danger text-lg cursor-pointer" />
+                                                                                        :
+                                                                                        <FaRegHeart data-tooltip-id={`fav__book-${book.id}`} data-tooltip-content="Add to favourite" className="text-danger text-lg cursor-pointer" />
+                                                                                }
+                                                                            </button>
+                                                                            <Tooltip id={`purchased__book-${book.id}`} className="custom__tooltip" />
                                                                         </div>
-                                                                        <div className='custom__list three-line-text'>
-                                                                            <RichTextElement content={book.description} />
+                                                                    }
+
+                                                                    <div className="flex flex-col gap-y-5 order-1 lg:order-2">
+                                                                        <Link href={`/book/${book.id}`} className="w-fit text-base md:text-lg font-semibold">{book.title}</Link>
+                                                                        <div className="flex flex-col gap-y-3">
+                                                                            {
+                                                                                book.author &&
+                                                                                <Link href={`/author/${book.author.id}`} className="w-fit font-medium"><span className='font-normal'>By</span> {book.author.name}</Link>
+                                                                            }
+                                                                            <div className='flex items-center gap-x-1 text-yellow-400 text-base'>
+                                                                                {
+                                                                                    book.rating >= 1 ? <FaStar /> : <FaRegStar />
+                                                                                }
+                                                                                {
+                                                                                    book.rating >= 2 ? <FaStar /> : <FaRegStar />
+                                                                                }
+                                                                                {
+                                                                                    book.rating >= 3 ? <FaStar /> : <FaRegStar />
+                                                                                }
+                                                                                {
+                                                                                    book.rating >= 4 ? <FaStar /> : <FaRegStar />
+                                                                                }
+                                                                                {
+                                                                                    book.rating >= 5 ? <FaStar /> : <FaRegStar />
+                                                                                }
+                                                                            </div>
+                                                                            <div className='custom__list three-line-text'>
+                                                                                <RichTextElement content={book.description} />
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
+
+                                                            {
+                                                                index === purchasedBooks.length - 1 &&
+                                                                <div ref={purchasedBookRef} className="invisible opacity-0 z-[-1]"></div>
+                                                            }
                                                         </div>
-
-                                                        {
-                                                            index === purchasedBooks.length - 1 &&
-                                                            <div ref={purchasedBookRef} className="invisible opacity-0 z-[-1]"></div>
-                                                        }
-                                                    </div>
-                                                ))
-                                            }
-                                        </div>
-
-                                        {
-                                            isPurchasedBooksFetching &&
-                                            <div className="mt-5 w-full flex items-center justify-center">
-                                                <ImSpinner className="page__spinner" />
+                                                    ))
+                                                }
                                             </div>
-                                        }
-                                    </> : <p>No book purchased yet!</p>
-                        }
+
+                                            {
+                                                isPurchasedBooksFetching &&
+                                                <div className="mt-5 w-full flex items-center justify-center">
+                                                    <ImSpinner className="page__spinner" />
+                                                </div>
+                                            }
+                                        </> : <p>No book purchased yet!</p>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <Footer />
-        </>
+                <Footer />
+            </>
     )
 }
 

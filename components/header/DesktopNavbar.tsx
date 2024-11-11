@@ -6,8 +6,12 @@ import { useNavStore } from "@/store/NavStore"
 import { DarkModeSwitch } from 'react-toggle-dark-mode';
 import { useThemeStore } from "@/store/ThemeStore"
 import { pb } from "@/store/PocketbaseStore"
+import { IoMdLogIn } from "react-icons/io"
+import { usePathname } from "next/navigation"
 
 const DesktopNavbar = () => {
+  const pathname = usePathname();
+
   const navSearchRef = useRef<HTMLDivElement | null>(null);
   const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
   const toggleDarkMode = useThemeStore((state: any) => state.toggleDarkMode);
@@ -44,7 +48,7 @@ const DesktopNavbar = () => {
       <Link href="/" className="whitespace-nowrap text-3xl font-semibold italic">E-Book</Link>
 
       {
-        pb.authStore?.model &&
+        pathname !== "/login" &&
         <div onClick={() => toggleBookModalSearch(true)} ref={navSearchRef} className="w-1/2 flex items-center gap-x-3 rounded-md py-1.5 px-3 theme-block transition-all duration-200 ease-linear">
           <input onFocus={searchNavOnFocus} onBlur={searchNavOnBlur} type="text" className="w-full bg-transparent focus:outline-none" placeholder="Search books..." readOnly={true} />
           <IoSearch className="text-xl text-stone-500/80 cursor-pointer" />
@@ -53,8 +57,11 @@ const DesktopNavbar = () => {
 
       <div className="flex items-center gap-x-5">
         {
-          pb.authStore?.model &&
-          <NavProfile />
+          pb.authStore?.model ?
+            <NavProfile /> :
+            <Link href="/login" className="flex items-center gap-x-1 underline">
+              <IoMdLogIn className="text-base" /> Sign In
+            </Link>
         }
         <DarkModeSwitch
           checked={isDarkMode}

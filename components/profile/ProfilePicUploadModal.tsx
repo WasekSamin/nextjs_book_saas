@@ -30,6 +30,8 @@ const ProfilePicUploadModal = () => {
     const isUpdateProfilePic = useUserStore((state: any) => state.isUpdateProfilePic);
     const toggleIsUpdateProfilePic = useUserStore((state: any) => state.toggleIsUpdateProfilePic);
 
+    const controllerRef = useRef<AbortController>();
+
     const handleFormError = ({ errId, errMsg }: HANDLE_FORM_ERROR) => {
         if (errId === 1 && errMsg) {
             setFormError({
@@ -77,18 +79,28 @@ const ProfilePicUploadModal = () => {
             return;
         }
 
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         await addProfilePic({
-            profilePic: profilePicFile
+            profilePic: profilePicFile,
+            signal: signal
         });
     }
 
-    const addProfilePic = async ({ profilePic }: { profilePic: File | "" }) => {
+    const addProfilePic = async ({ profilePic, signal }: { profilePic: File | "", signal: AbortSignal }) => {
         const formData = {
             avatar: profilePic
         }
 
         try {
-            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData, {
+                signal: signal
+            });
 
             if (userRecord) {
                 makeToast({

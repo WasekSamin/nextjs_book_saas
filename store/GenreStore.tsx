@@ -3,10 +3,11 @@ import { create } from 'zustand'
 import { pb } from './PocketbaseStore';
 
 // Fetch all the genres
-export const fetchAllGenres = async ({searchText}: {searchText: string}) => {
+export const fetchAllGenres = async ({searchText, signal}: {searchText: string, signal: AbortSignal}) => {
     try {
         const genreRecords = await pb.collection('genres').getFullList({
-            filter: `title~"${searchText}"`
+            filter: `title~"${searchText}"`,
+            signal: signal
         });
 
         return genreRecords;
@@ -15,9 +16,11 @@ export const fetchAllGenres = async ({searchText}: {searchText: string}) => {
     }
 }
 
-export const fetchGenreDetails = async(genreId: string) => {
+export const fetchGenreDetails = async({genreId, signal}: {genreId: string, signal: AbortSignal}) => {
     try {
-        const genreRecord: RecordModel = await pb.collection('genres').getOne(genreId);
+        const genreRecord: RecordModel = await pb.collection('genres').getOne(genreId, {
+            signal: signal
+        });
 
         return genreRecord;
     } catch(err) {

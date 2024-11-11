@@ -28,6 +28,8 @@ const RequestBookForm = () => {
     const authorNameRef = useRef<HTMLInputElement | null>(null);
     const publishedDateRef = useRef<any>(null);
 
+    const controllerRef = useRef<AbortController>();
+
     const handleBookFormSubmit = async (e: any) => {
         e.preventDefault();
 
@@ -54,17 +56,25 @@ const RequestBookForm = () => {
             return;
         };
 
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+
+        controllerRef.current = new AbortController();
+        const signal = controllerRef.current.signal;
+
         await addBookRequest({
             title: title,
             authorName: authorName,
             publishedDate: bookPublishedDate,
-            bookThumbnail: bookThumbnailFile
+            bookThumbnail: bookThumbnailFile,
+            signal: signal
         });
     }
 
     const addBookRequest = async ({
-        title, authorName, publishedDate, bookThumbnail
-    }: { title: string, authorName: string, publishedDate: Date | "", bookThumbnail: File | "" }) => {
+        title, authorName, publishedDate, bookThumbnail, signal
+    }: { title: string, authorName: string, publishedDate: Date | "", bookThumbnail: File | "", signal: AbortSignal }) => {
         const formData = {
             user: pb?.authStore?.model?.id,
             book_title: title,
@@ -75,7 +85,9 @@ const RequestBookForm = () => {
         }
 
         try {
-            const bookRequestRecord = await pb.collection('requested_books').create(formData);
+            const bookRequestRecord = await pb.collection('requested_books').create(formData, {
+                signal: signal
+            });
 
             if (bookRequestRecord) {
                 makeToast({
