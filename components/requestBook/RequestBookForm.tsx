@@ -181,7 +181,7 @@ const RequestBookForm = () => {
             <div className="flex flex-col gap-y-3">
                 <label htmlFor="">Book Thumbnail (Optional)</label>
                 <div className="react__fileUploader">
-                    <FileUploader handleChange={handleBookThumbnailChange} name="file" types={REQUEST_BOOK_THUMBNAIL_FILE_TYPES}
+                    <FileUploader handleChange={handleBookThumbnailChange} name="file" types={REQUEST_BOOK_THUMBNAIL_FILE_TYPES} maxSize={50}
                         className="w-full"
                     />
                 </div>

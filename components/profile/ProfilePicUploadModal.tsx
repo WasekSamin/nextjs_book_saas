@@ -154,7 +154,7 @@ const ProfilePicUploadModal = () => {
                     <div className="flex flex-col gap-y-3">
                         <div className="flex flex-col gap-y-1.5">
                             <div className="react__fileUploader">
-                                <FileUploader handleChange={handleProfilePicChange} name="file" types={PROFILE_PIC_FILE_TYPES}
+                                <FileUploader handleChange={handleProfilePicChange} name="file" types={PROFILE_PIC_FILE_TYPES} maxSize={50}
                                     className="w-full"
                                 />
                             </div>
