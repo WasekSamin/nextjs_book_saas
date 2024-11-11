@@ -1,6 +1,7 @@
 import Link from "next/link";
 import "@/css/Footer.css";
 import SubscriberFooter from "./SubscriberFooter";
+import { pb } from "@/store/PocketbaseStore";
 
 const QUICK_LINKS = [
     {
@@ -26,7 +27,7 @@ const Footer = () => {
         <>
             <div className="theme-block">
                 <div className="base-layout container mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div className={`grid grid-cols-1 ${pb?.authStore?.model ? "md:grid-cols-3" : "md:grid-cols-2"} gap-10`}>
                         <div className="flex flex-col gap-y-5">
                             <div>
                                 <Link href="/" className="whitespace-nowrap text-xl md:text-3xl font-semibold italic">E-Books</Link>
@@ -48,7 +49,10 @@ const Footer = () => {
                             </ul>
                         </div>
 
-                        <SubscriberFooter />
+                        {
+                            pb?.authStore?.model &&
+                            <SubscriberFooter />
+                        }
                     </div>
                 </div>
             </div>
