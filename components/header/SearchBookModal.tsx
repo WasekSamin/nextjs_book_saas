@@ -192,7 +192,7 @@ const SearchBookModal = () => {
                             <div className="flex flex-wrap gap-0.5">
                               {
                                 book.authors.map((author: RecordModel, index: number) => (
-                                  <Link key={author.id} href={`/author/${author.id}`} className="w-fit font-medium">{author.name}{index !== book.authors.length - 1 && ","}</Link>
+                                  <Link key={author.id} onClick={handleCloseSearchBookModal} href={`/author/${author.id}`} className="w-fit font-medium">{author.name}{index !== book.authors.length - 1 && ","}</Link>
                                 ))
                               }
                             </div>
