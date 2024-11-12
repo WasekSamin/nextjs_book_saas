@@ -1,17 +1,15 @@
 import { RecordModel } from "pocketbase";
 import { create } from "zustand";
-import { pb } from "./PocketbaseStore";
+import pb from "./PocketbaseStore";
 
 const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
 
-export const fetchBookReviews = async({page, bookId, signal}: {page: number, bookId: string, signal: AbortSignal}) => {
+export const fetchBookReviews = async({page, bookId}: {page: number, bookId: string}) => {
     try {
         const reviewList = await pb.collection('feedbacks').getList(page, PAGINATION_LIMIT, {
             filter: `book.id="${bookId}" && is_hidden=${false}`,
             expand: "user",
-            sort: "-created",
-            requestKey: null,
-            signal: signal
+            sort: "-created"
         });
 
         return reviewList;
@@ -41,18 +39,15 @@ export const useReviewStore = create((set) => ({
         }))
     },
     bookReviews: [],
-    bookReviewIds: new Set(),
     addBookReview: (review: RecordModel) => {
         set((state: any) => ({
-            bookReviews: [...state.bookReviews, review],
-            bookReviewIds: new Set([...state.bookReviewIds, review.id])
+            bookReviews: [...state.bookReviews, review]
         }))
     },
     // When new comment/review is submitted, just push it to the top
     addNewBookReview: (review: RecordModel) => {
         set((state: any) => ({
-            bookReviews: [review, ...state.bookReviews],
-            bookReviewIds: new Set([...state.bookReviewIds, review.id])
+            bookReviews: [review, ...state.bookReviews]
         }))
     },
     updateBookReview: (review: RecordModel) => {
@@ -63,7 +58,6 @@ export const useReviewStore = create((set) => ({
     emptyBookReview: () => {
         set(() => ({
             bookReviews: [],
-            bookReviewIds: new Set(),
             bookReviewPage: 1,
             reRenderBookReview: true
         }))

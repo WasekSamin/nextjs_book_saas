@@ -4,7 +4,7 @@ import Footer from '@/components/footer/Footer'
 import Navbar from '@/components/header/Navbar'
 import { fetchFavouriteBooks, useBookStore } from '@/store/BookStore';
 import { usePageStore } from '@/store/PageStore';
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { updateBookFavouriteMode } from '@/utils/favouriteBookFunc';
 import { RichTextElement } from '@/utils/RichTextElement'
 import Image from 'next/image'
@@ -38,23 +38,13 @@ const FavouriteBooks = () => {
     const emptyPopGenreBooks = useBookStore((state: any) => state.emptyPopGenreBooks);
     const emptyPurchasedBooks = useBookStore((state: any) => state.emptyPurchasedBooks);
 
-    const controllerRef = useRef<AbortController>();
-    const favouriteBookControllerRef = useRef<AbortController>();
-
     // Page store
     const isPageLoading = usePageStore((state: any) => state.isPageLoading);
 
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
-        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page, signal: signal });
+        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
 
         if (favBooks) {
             for (let i = 0; i < favBooks.length; i++) {
@@ -92,23 +82,17 @@ const FavouriteBooks = () => {
     }, [reRenderFavouriteBooks])
 
     useEffect(() => {
-        favouriteBookInView && loadFavouriteBookInView();
+        if (favouriteBookInView) {
+            loadFavouriteBookInView();
+        }
     }, [favouriteBookInView])
 
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const signal = favouriteBookControllerRef.current.signal;
-
         const favouriteBook: RecordModel = await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         removeFavouriteBook(favouriteBook);
@@ -149,7 +133,7 @@ const FavouriteBooks = () => {
                                                                     <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                                         {
                                                                             pb?.authStore?.model &&
-                                                                            <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                                            <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
                                                                                 <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                                     {
                                                                                         book.is_favourite ?

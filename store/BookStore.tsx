@@ -1,24 +1,23 @@
 import { ListResult, RecordModel } from 'pocketbase';
 import { create } from 'zustand'
-import { pb } from './PocketbaseStore';
+import pb from './PocketbaseStore';
 import { isFavouriteBook } from '@/utils/favouriteBookFunc';
 
 const PAGINATION_LIMIT = Number(process.env.NEXT_PUBLIC_PAGINATION_LIMIT);
 
-export const fetchBookDetail = async({bookId, signal}: {bookId: string, signal: AbortSignal }) => {
+export const fetchBookDetail = async ({ bookId }: { bookId: string }) => {
     try {
         const book = await pb.collection('books').getOne(bookId, {
-            expand: 'authors, genres',
-            signal: signal
+            expand: 'authors, genres'
         });
 
         if (book) {
             if (pb?.authStore?.model) {
-                const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: signal});
+                const isFav: boolean = await isFavouriteBook({ bookId: book.id });
                 book.is_favourite = isFav;
             }
 
-            const {authors, genres}: any = book?.expand;
+            const { authors, genres }: any = book?.expand;
 
             if (authors) {
                 book.authors = authors;
@@ -29,47 +28,43 @@ export const fetchBookDetail = async({bookId, signal}: {bookId: string, signal: 
         }
 
         return book;
-    } catch(err) {
+    } catch (err) {
         return null;
     }
 }
 
-export const fetchBooks = async({page, genreId, authorId, signal}: {page: number, genreId?: string, authorId?: string, signal: AbortSignal}) => {
+export const fetchBooks = async ({ page, genreId, authorId }: { page: number, genreId?: string, authorId?: string }) => {
     let bookList: ListResult<RecordModel>;
+
+    console.log(page, genreId, authorId)
 
     try {
         if (genreId) {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `genres~"${genreId}"`,
                 expand: "authors",
-                sort: "-created",
-                requestKey: null,
-                signal: signal
+                sort: "-created"
             });
         } else if (authorId) {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 filter: `authors~"${authorId}"`,
                 expand: "authors",
-                sort: "-created",
-                requestKey: null,
-                signal: signal
+                sort: "-created"
             });
         } else {
             bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
                 sort: "-created",
-                expand: "authors",
-                requestKey: null,
-                signal: signal
+                expand: "authors"
             });
         }
 
         return bookList;
-    } catch(err) {
+    } catch (err) {
         return [];
     }
 }
 
-export const searchBooks = async({page, searchText, signal}: {page: number, searchText: string, signal: AbortSignal}) => {
+export const searchBooks = async ({ page, searchText }: { page: number, searchText: string }) => {
     if (searchText === "") {
         return [];
     }
@@ -78,56 +73,48 @@ export const searchBooks = async({page, searchText, signal}: {page: number, sear
         const bookList = await pb.collection('books').getList(page, PAGINATION_LIMIT, {
             filter: `id~"${searchText}" || title~"${searchText}"`,
             expand: "authors",
-            sort: "-created",
-            requestKey: null,
-            signal: signal
+            sort: "-created"
         });
 
         return bookList;
-    } catch(err) {
+    } catch (err) {
         return [];
     }
 }
 
-export const fetchFavouriteBooks = async({page, signal}: {page: number, signal: AbortSignal}) => {
+export const fetchFavouriteBooks = async ({ page }: { page: number }) => {
     try {
         const favBookList: ListResult<RecordModel> = await pb.collection('favourite_books').getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
-            sort: "-created",
-            requestKey: null,
-            signal: signal
+            sort: "-created"
         });
 
         return favBookList;
-    } catch(err) {
+    } catch (err) {
         return [];
     }
 }
 
-export const fetchPurchasedBooks = async({page, signal}: {page: number, signal: AbortSignal}) => {
+export const fetchPurchasedBooks = async ({ page }: { page: number }) => {
     try {
         const purchasedBookList: ListResult<RecordModel> = await pb.collection("purchased_books").getList(page, PAGINATION_LIMIT, {
             filter: `user.id="${pb?.authStore?.model?.id}"`,
             expand: "book, book.authors",
-            sort: "-created",
-            requestKey: null,
-            signal: signal
+            sort: "-created"
         })
 
         return purchasedBookList;
-    } catch(err) {
+    } catch (err) {
         return [];
     }
 }
 
-export const fetchPurchasedBook = async({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
+export const fetchPurchasedBook = async ({ bookId }: { bookId: string }) => {
     try {
-        const bookRecord: RecordModel = await pb.collection("purchased_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`, {
-            signal: signal
-        });
+        const bookRecord: RecordModel = await pb.collection("purchased_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`);
         return bookRecord;
-    } catch(err) {
+    } catch (err) {
         return null;
     }
 }
@@ -154,6 +141,8 @@ export const useBookStore = create((set) => ({
             similarBooks: []
         }))
     },
+
+    // Similar books
     isSimilarBookFetching: true,
     updateIsSimilarBookFetching: (isSubmit: boolean) => {
         set(() => ({
@@ -240,7 +229,7 @@ export const useBookStore = create((set) => ({
     },
     updatePopGenreBook: (bookId: string, bookNewData: any) => {
         set((state: any) => ({
-            popGenreBooks: state.popGenreBooks?.map((book: RecordModel) => book.id === bookId ? {...bookNewData} : book)
+            popGenreBooks: state.popGenreBooks?.map((book: RecordModel) => book.id === bookId ? { ...bookNewData } : book)
         }))
     },
     emptyPopGenreBooks: () => {
@@ -323,7 +312,7 @@ export const useBookStore = create((set) => ({
             reRenderAuthorBooks: true,
         }))
     },
-    
+
     // Favourite book
     reRenderFavouriteBooks: true,
     updateReRenderFavouriteBooks: (isRender: boolean) => {

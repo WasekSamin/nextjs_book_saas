@@ -1,5 +1,5 @@
 import { useBookStore } from "@/store/BookStore";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { useThemeStore } from "@/store/ThemeStore";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
 import { makeToast } from "@/utils/toastMesage";

@@ -5,7 +5,7 @@ import Navbar from '@/components/header/Navbar'
 import { BOOKS } from '@/data'
 import { fetchPurchasedBooks, useBookStore } from '@/store/BookStore';
 import { usePageStore } from '@/store/PageStore';
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { isFavouriteBook, updateBookFavouriteMode } from '@/utils/favouriteBookFunc';
 import { RichTextElement } from '@/utils/RichTextElement'
 import Image from 'next/image'
@@ -40,27 +40,10 @@ const PurchasedBooks = () => {
         threshold: 0,
     });
 
-    const purchasedBookControllerRef = useRef<AbortController>();
-    const favouriteBookControllerRef = useRef<AbortController>();
-
     const getPurchasedBooks = async (page: number) => {
         updateIsPurcasedBooksFetching(true);
 
-        if (purchasedBookControllerRef.current) {
-            purchasedBookControllerRef.current.abort();
-        }
-
-        purchasedBookControllerRef.current = new AbortController();
-        const signal = purchasedBookControllerRef.current.signal;
-
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const favouriteBookSignal = favouriteBookControllerRef.current.signal;
-
-        const { items: purchasedBookList }: any = await fetchPurchasedBooks({ page: page, signal: signal });
+        const { items: purchasedBookList }: any = await fetchPurchasedBooks({ page: page });
 
         if (purchasedBookList) {
             for (let i = 0; i < purchasedBookList.length; i++) {
@@ -70,7 +53,7 @@ const PurchasedBooks = () => {
 
                 if (book) {
                     if (pb?.authStore?.model) {
-                        const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: favouriteBookSignal});
+                        const isFav: boolean = await isFavouriteBook({ bookId: book.id });
                         book.is_favourite = isFav;
                     }
 
@@ -96,17 +79,9 @@ const PurchasedBooks = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const signal = favouriteBookControllerRef.current.signal;
-
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -120,7 +95,9 @@ const PurchasedBooks = () => {
     }, [reRenderPurchasedBooks])
 
     useEffect(() => {
-        purchasedBookInView && loadPurchasedBookInView();
+        if (purchasedBookInView) {
+            loadPurchasedBookInView();
+        }
     }, [purchasedBookInView])
 
     return (
@@ -154,7 +131,7 @@ const PurchasedBooks = () => {
                                                                 <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                                     {
                                                                         pb?.authStore?.model &&
-                                                                        <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                                        <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
                                                                             <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                                 {
                                                                                     book.is_favourite ?

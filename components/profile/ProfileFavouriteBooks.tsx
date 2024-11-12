@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import FavouriteBookSliderButton from "./FavouriteBookSliderButton";
 import { fetchFavouriteBooks, useBookStore } from "@/store/BookStore";
 import { ListResult, RecordModel } from "pocketbase";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { updateBookFavouriteMode } from "@/utils/favouriteBookFunc";
 import { ImSpinner } from "react-icons/im";
 
@@ -39,9 +39,6 @@ const ProfileFavouriteBooks = () => {
         prevBtn: false,
         nextBtn: true
     });
-
-    const favouriteBookListControllerRef = useRef<AbortController>();
-    const favouriteBookControllerRef = useRef<AbortController>();
 
     const handleSlidePrevSlide = () => {
         if (favouriteBookSwiperRef.current) {
@@ -80,14 +77,7 @@ const ProfileFavouriteBooks = () => {
     const getFavouriteBooks = async (page: number) => {
         updateIsFavouriteBookDataFetching(true);
 
-        if (favouriteBookListControllerRef.current) {
-            favouriteBookListControllerRef.current.abort();
-        }
-
-        favouriteBookListControllerRef.current = new AbortController();
-        const signal = favouriteBookListControllerRef.current.signal;
-
-        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page, signal: signal });
+        const { items: favBooks }: any = await fetchFavouriteBooks({ page: page });
 
         if (favBooks) {
             for (let i = 0; i < favBooks.length; i++) {
@@ -123,17 +113,9 @@ const ProfileFavouriteBooks = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const signal = favouriteBookControllerRef.current.signal;
-
         const favouriteBook: RecordModel = await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         removeFavouriteBook(favouriteBook);

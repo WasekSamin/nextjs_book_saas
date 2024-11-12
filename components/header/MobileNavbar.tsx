@@ -8,7 +8,7 @@ import { useRef } from "react";
 import { RiMenu2Line } from "react-icons/ri";
 import MobileNavSidebar from "./MobileNavSidebar";
 import { AnimatePresence } from "framer-motion";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { usePathname } from "next/navigation";
 import { IoMdLogIn } from "react-icons/io";
 

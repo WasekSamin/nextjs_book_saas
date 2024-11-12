@@ -1,4 +1,4 @@
-import { pb } from "@/store/PocketbaseStore"
+import pb from "@/store/PocketbaseStore"
 import BookReviewForm from "./BookReviewForm"
 import Reviews from "./Reviews"
 

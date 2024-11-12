@@ -33,35 +33,18 @@ const BookDetail = () => {
     const emptyPurchasedBookDetails = useBookStore((state: any) => state.emptyPurchasedBookDetails);
     const emptySimilarBooks = useBookStore((state: any) => state.emptySimilarBooks);
 
-    const purchasedBookControllerRef = useRef<AbortController>();
-    const bookControllerRef = useRef<AbortController>();
-
     // Review store
     const emptyBookReviewDetails = useReviewStore((state: any) => state.emptyBookReviewDetails);
     const emptyBookReview = useReviewStore((state: any) => state.emptyBookReview);
 
     const getPurchasedBook = async () => {
-        if (purchasedBookControllerRef.current) {
-            purchasedBookControllerRef.current.abort();
-        }
-
-        purchasedBookControllerRef.current = new AbortController();
-        const signal = purchasedBookControllerRef.current.signal;
-
-        const purchasedBook = await fetchPurchasedBook({bookId: bookId, signal: signal});
+        const purchasedBook = await fetchPurchasedBook({bookId: bookId });
 
         updatePurchasedBookDetails(purchasedBook);
     }
 
     const getBookDetails = async() => {
-        if (bookControllerRef.current) {
-            bookControllerRef.current.abort();
-        }
-
-        bookControllerRef.current = new AbortController();
-        const signal = bookControllerRef.current.signal;
-
-        const book = await fetchBookDetail({bookId, signal: signal});
+        const book = await fetchBookDetail({bookId });
 
         if (book) {
             updateBookDetails(book);

@@ -5,7 +5,7 @@ import { IoIosLogOut, IoMdLogIn } from "react-icons/io";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 
 const MobileNavSidebar = ({ navSidebarToggleBtnRef, handleNavSidebarToggle }: any) => {
     const pathname = usePathname();

@@ -1,5 +1,5 @@
 import { fetchBooks, useBookStore } from "@/store/BookStore";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { RichTextElement } from "@/utils/RichTextElement";
 import Image from "next/image"
 import Link from "next/link";
@@ -27,9 +27,6 @@ const PopularGenreBooks = () => {
     const emptyFavouriteBooks = useBookStore((state: any) => state.emptyFavouriteBooks);
     const emptyPurchasedBooks = useBookStore((state: any) => state.emptyPurchasedBooks);
 
-    const popGenreBookControllerRef = useRef<AbortController>();
-    const favouriteBookControllerRef = useRef<AbortController>();
-
     // Genre store
     const activeGenre = useGenreStore((state: any) => state.activeGenre);
 
@@ -39,34 +36,22 @@ const PopularGenreBooks = () => {
         threshold: 0,
     });
 
-    const fetchGenreBooks = async (page: number) => {        
+    const fetchGenreBooks = async (page: number) => {
         updateIsPopGenreBookDataFetching(true);
 
-        if (popGenreBookControllerRef.current) {
-            popGenreBookControllerRef.current.abort();
-        }
+        const { items: books }: any = await fetchBooks({ page: page, genreId: activeGenre });
 
-        popGenreBookControllerRef.current = new AbortController();
-        const signal = popGenreBookControllerRef.current.signal;
-
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const favouriteBookSignal = favouriteBookControllerRef.current.signal;
-
-        const { items: books }: any = await fetchBooks({ page: page, genreId: activeGenre, signal: signal });
+        console.log("BOOKS", books)
 
         if (books) {
             for (let i = 0; i < books.length; i++) {
                 const book: RecordModel = books[i];
 
                 if (pb?.authStore?.model) {
-                    const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: favouriteBookSignal});
+                    const isFav: boolean = await isFavouriteBook({ bookId: book.id });
                     book.is_favourite = isFav;
                 }
-                
+
                 const { authors }: any = book?.expand;
 
                 if (authors) {
@@ -89,30 +74,20 @@ const PopularGenreBooks = () => {
         if (reRenderPopGenreBooks) {
             fetchGenreBooks(1);
         }
-
-        return () => {
-            updatePopGenreBookPage(1);
-        }
     }, [reRenderPopGenreBooks])
 
     useEffect(() => {
-        popGenreBookInView && loadPopGenreBookInView();
+        if (popGenreBookInView) {
+            loadPopGenreBookInView();
+        }
     }, [popGenreBookInView])
 
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const signal = favouriteBookControllerRef.current.signal;
-
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -140,7 +115,7 @@ const PopularGenreBooks = () => {
                                                 <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                     {
                                                         pb?.authStore?.model &&
-                                                        <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                        <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
                                                             <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                 {
                                                                     book.is_favourite ?

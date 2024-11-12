@@ -36,20 +36,11 @@ const PopularGenreSlider = () => {
 
     const [currentTab, setCurrentTab] = useState(activeGenre);
 
-    const controllerRef = useRef<AbortController>();
-
     const getAllGenres = async () => {
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
-        const genres: RecordModel[] = await fetchAllGenres({searchText: "", signal: signal});
+        const genres: RecordModel[] = await fetchAllGenres({ searchText: "" });
 
         if (genres) {
-            for (let i=0; i<genres.length; i++) {
+            for (let i = 0; i < genres.length; i++) {
                 const genre: RecordModel = genres[i];
 
                 addGenres(genre);

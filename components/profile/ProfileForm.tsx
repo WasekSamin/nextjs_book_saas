@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { useUserStore } from "@/store/UserStore";
 import { FiEdit } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
 import { makeToast } from "@/utils/toastMesage";
 
@@ -14,8 +14,6 @@ const ProfileForm = () => {
     const updateIsUserSubmitting = useUserStore((state: any) => state.updateIsUserSubmitting);
 
     const nameRef = useRef<HTMLInputElement | null>(null);
-
-    const controllerRef = useRef<AbortController>();
 
     const handleProfileUpdate = async (e: any) => {
         e.preventDefault();
@@ -36,28 +34,18 @@ const ProfileForm = () => {
             return;
         }
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
         await editUser({
-            name: name,
-            signal: signal
+            name: name
         });
     }
 
-    const editUser = async ({name, signal}: {name: string, signal: AbortSignal}) => {
+    const editUser = async ({name}: {name: string}) => {
         const formData = {
             name: name
         }
 
         try {
-            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData, {
-                signal: signal
-            });
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
 
             if (userRecord) {
                 makeToast({

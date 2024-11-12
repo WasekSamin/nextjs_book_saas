@@ -8,7 +8,7 @@ import { FiEdit } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import FormErrorElement from "../FormErrorElement";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { makeToast } from "@/utils/toastMesage";
 import { useThemeStore } from "@/store/ThemeStore";
 
@@ -29,8 +29,6 @@ const ProfilePicUploadModal = () => {
     const updateIsProfilePicSubmitting = useUserStore((state: any) => state.updateIsProfilePicSubmitting);
     const isUpdateProfilePic = useUserStore((state: any) => state.isUpdateProfilePic);
     const toggleIsUpdateProfilePic = useUserStore((state: any) => state.toggleIsUpdateProfilePic);
-
-    const controllerRef = useRef<AbortController>();
 
     const handleFormError = ({ errId, errMsg }: HANDLE_FORM_ERROR) => {
         if (errId === 1 && errMsg) {
@@ -79,28 +77,18 @@ const ProfilePicUploadModal = () => {
             return;
         }
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
         await addProfilePic({
-            profilePic: profilePicFile,
-            signal: signal
+            profilePic: profilePicFile
         });
     }
 
-    const addProfilePic = async ({ profilePic, signal }: { profilePic: File | "", signal: AbortSignal }) => {
+    const addProfilePic = async ({ profilePic }: { profilePic: File | "" }) => {
         const formData = {
             avatar: profilePic
         }
 
         try {
-            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData, {
-                signal: signal
-            });
+            const userRecord = await pb.collection('users').update(pb?.authStore?.model?.id, formData);
 
             if (userRecord) {
                 makeToast({

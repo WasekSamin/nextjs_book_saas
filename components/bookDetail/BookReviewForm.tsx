@@ -7,7 +7,7 @@ import { ImSpinner9 } from "react-icons/im";
 import { HANDLE_FORM_ERROR } from "@/utils/formError";
 import { useReviewStore } from "@/store/ReviewStore";
 import { useBookStore } from "@/store/BookStore";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { makeToast } from "@/utils/toastMesage";
 import { useThemeStore } from "@/store/ThemeStore";
 import { TiCancel } from "react-icons/ti";
@@ -40,8 +40,6 @@ const BookReviewForm = () => {
     const updateBookReview = useReviewStore((state: any) => state.updateBookReview);
     const bookReviewDetails = useReviewStore((state: any) => state.bookReviewDetails);
     const updateBookReviewDetails = useReviewStore((state: any) => state.updateBookReviewDetails);
-
-    const controllerRef = useRef<AbortController>();
 
     // Book store
     const bookDetails = useBookStore((state: any) => state.bookDetails);
@@ -147,43 +145,37 @@ const BookReviewForm = () => {
             return;
         }
 
+        let formErrorExist = false;
         const rating = bookRating.currentRating;
         const reviewMessage = reviewMessageRef.current?.value?.trim() ?? "";
 
         if (rating < 1) {
+            formErrorExist = true;
             handleFormError({ errId: 1, errMsg: "Rating is required!" });
-            return;
         }
         if (reviewMessage === "") {
+            formErrorExist = true;
             handleFormError({
                 name: "message", isError: true
             });
-            return;
         }
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
+        if (formErrorExist) return;
 
         if (!bookReviewDetails) {
             await createBookReview({
                 rating: rating,
-                msg: reviewMessage,
-                signal: signal
+                msg: reviewMessage
             });
         } else {
             await editBookReview({
                 rating: rating,
-                msg: reviewMessage,
-                signal: signal
+                msg: reviewMessage
             });
         }
     }
 
-    const editBookReview = async ({ rating, msg, signal }: { rating: number, msg: string, signal: AbortSignal }) => {
+    const editBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
         const formData = {
             rating: rating,
             review_message: msg,
@@ -192,8 +184,7 @@ const BookReviewForm = () => {
 
         try {
             const reviewRecord = await pb.collection('feedbacks').update(bookReviewDetails.id, formData, {
-                expand: "user",
-                signal: signal
+                expand: "user"
             });
 
             if (reviewRecord) {
@@ -227,7 +218,7 @@ const BookReviewForm = () => {
         }
     }
 
-    const createBookReview = async ({ rating, msg, signal }: { rating: number, msg: string, signal: AbortSignal }) => {
+    const createBookReview = async ({ rating, msg }: { rating: number, msg: string }) => {
         const formData = {
             rating: rating,
             review_message: msg,
@@ -237,8 +228,7 @@ const BookReviewForm = () => {
 
         try {
             const reviewRecord = await pb.collection('feedbacks').create(formData, {
-                expand: "user",
-                signal: signal
+                expand: "user"
             });
 
             if (reviewRecord) {

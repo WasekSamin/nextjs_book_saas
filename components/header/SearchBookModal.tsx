@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { useDebouncedCallback } from 'use-debounce';
 import { searchBooks, useBookStore } from "@/store/BookStore";
 import { RecordModel } from "pocketbase";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { ImSpinner } from "react-icons/im";
 import { useInView } from "react-intersection-observer";
 

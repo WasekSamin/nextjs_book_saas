@@ -5,7 +5,7 @@ import { useRef } from "react"
 import { useNavStore } from "@/store/NavStore"
 import { DarkModeSwitch } from 'react-toggle-dark-mode';
 import { useThemeStore } from "@/store/ThemeStore"
-import { pb } from "@/store/PocketbaseStore"
+import pb from "@/store/PocketbaseStore"
 import { IoMdLogIn } from "react-icons/io"
 import { usePathname } from "next/navigation"
 
@@ -57,7 +57,7 @@ const DesktopNavbar = () => {
 
       <div className="flex items-center gap-x-5">
         {
-          pb.authStore?.model ?
+          pb?.authStore?.model ?
             <NavProfile /> :
             <Link href="/login" className="flex items-center gap-x-1 underline">
               <IoMdLogIn className="text-base" /> Sign In

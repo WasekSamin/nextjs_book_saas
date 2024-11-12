@@ -1,15 +1,13 @@
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { makeToast } from "./toastMesage";
 import { RecordModel } from "pocketbase";
 
 // Check if the book is favourite or not
-export const isFavouriteBook = async ({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
+export const isFavouriteBook = async ({bookId}: {bookId: string}) => {
     let isFav = false;
 
     try {
-        const favBookRecord = await pb.collection('favourite_books').getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`, {
-            signal: signal
-        });
+        const favBookRecord = await pb.collection('favourite_books').getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`);
 
         if (favBookRecord) {
             isFav = true;
@@ -22,11 +20,9 @@ export const isFavouriteBook = async ({bookId, signal}: {bookId: string, signal:
 }
 
 // Fetch favourite book using book id and user id
-export const fetchFavouriteBook = async({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
+export const fetchFavouriteBook = async({bookId}: {bookId: string}) => {
     try {
-        const favBookRecord = await pb.collection("favourite_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`, {
-            signal: signal
-        });
+        const favBookRecord = await pb.collection("favourite_books").getFirstListItem(`book.id="${bookId}" && user.id="${pb?.authStore?.model?.id}"`);
 
         if (favBookRecord) {
             return favBookRecord;
@@ -38,16 +34,14 @@ export const fetchFavouriteBook = async({bookId, signal}: {bookId: string, signa
     return null
 }
 
-export const addToFavouriteBookList = async({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
+export const addToFavouriteBookList = async({bookId}: {bookId: string}) => {
     const formData = {
         user: pb?.authStore?.model?.id,
         book: bookId
     }
 
     try {
-        const favBookRecord = await pb.collection('favourite_books').create(formData, {
-            signal: signal
-        });
+        const favBookRecord = await pb.collection('favourite_books').create(formData);
         return favBookRecord;
     } catch (err) {
         return null;
@@ -55,16 +49,14 @@ export const addToFavouriteBookList = async({bookId, signal}: {bookId: string, s
 }
 
 // Delete book from favourite list
-export const isDeletedFavouriteBook = async({bookId, signal}: {bookId: string, signal: AbortSignal}) => {
+export const isDeletedFavouriteBook = async({bookId}: {bookId: string}) => {
     let isDeleted = false;
 
-    const favBookRecord = await fetchFavouriteBook({bookId: bookId, signal: signal});
+    const favBookRecord = await fetchFavouriteBook({bookId: bookId});
 
     if (favBookRecord) {
         try {
-            await pb.collection('favourite_books').delete(favBookRecord.id, {
-                signal: signal
-            });
+            await pb.collection('favourite_books').delete(favBookRecord.id);
 
             isDeleted = true;
         } catch(err) {
@@ -76,13 +68,13 @@ export const isDeletedFavouriteBook = async({bookId, signal}: {bookId: string, s
 }
 
 // Update/Remove book from favourite book list
-export const updateBookFavouriteMode = async ({ book, isFav, signal }: { book: RecordModel, isFav: boolean, signal: AbortSignal }) => {
+export const updateBookFavouriteMode = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
     book.is_favourite = isFav;
 
     if (isFav) {
-        await addToFavouriteBookList({bookId: book.id, signal: signal});
+        await addToFavouriteBookList({bookId: book.id});
     } else {
-        await isDeletedFavouriteBook({bookId: book.id, signal: signal});
+        await isDeletedFavouriteBook({bookId: book.id});
     }
 
     return book;

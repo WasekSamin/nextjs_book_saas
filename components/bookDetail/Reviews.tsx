@@ -9,7 +9,7 @@ import { fetchBookReviews, useReviewStore } from "@/store/ReviewStore";
 import { useBookStore } from "@/store/BookStore";
 import { useInView } from "react-intersection-observer";
 import { RecordModel } from "pocketbase";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { ImSpinner } from "react-icons/im";
 
 const Reviews = () => {
@@ -30,8 +30,6 @@ const Reviews = () => {
     const addBookReview = useReviewStore((state: any) => state.addBookReview);
     const updateBookReviewDetails = useReviewStore((state: any) => state.updateBookReviewDetails);
 
-    const controllerRef = useRef<AbortController>();
-
     // Book store
     const bookDetails = useBookStore((state: any) => state.bookDetails);
 
@@ -47,14 +45,7 @@ const Reviews = () => {
     const getBookReviews = async (page: number) => {
         updateIsBookReviewFetching(true);
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
-        const { items: bookReviews }: any = await fetchBookReviews({ page: page, bookId: bookDetails.id, signal: signal });
+        const { items: bookReviews }: any = await fetchBookReviews({ page: page, bookId: bookDetails.id });
 
         if (bookReviews) {
             for (let i=0; i<bookReviews.length; i++) {
@@ -87,7 +78,9 @@ const Reviews = () => {
     }, [reRenderBookReview, bookDetails])
 
     useEffect(() => {
-        bookReviewInView && loadBookReviewInView();
+        if (bookReviewInView) {
+            loadBookReviewInView();
+        }
     }, [bookReviewInView])
 
     return (

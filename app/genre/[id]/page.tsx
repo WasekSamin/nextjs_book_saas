@@ -5,7 +5,7 @@ import Navbar from '@/components/header/Navbar'
 import { fetchBooks, useBookStore } from '@/store/BookStore';
 import { fetchGenreDetails, useGenreStore } from '@/store/GenreStore';
 import { usePageStore } from '@/store/PageStore';
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { isFavouriteBook, updateBookFavouriteMode } from '@/utils/favouriteBookFunc';
 import { RichTextElement } from '@/utils/RichTextElement'
 import Image from 'next/image'
@@ -49,34 +49,17 @@ const GenreWiseBook = () => {
     const emptyFavouriteBooks = useBookStore((state: any) => state.emptyFavouriteBooks);
     const emptyGenreBooks = useBookStore((state: any) => state.emptyGenreBooks);
 
-    const genreControllerRef = useRef<AbortController>();
-    const favouriteBookControllerRef = useRef<AbortController>();
-
     const getGenreWiseBooks = async (page: number) => {
         updateIsGenreBookFetching(true);
 
-        if (genreControllerRef.current) {
-            genreControllerRef.current.abort();
-        }
-
-        genreControllerRef.current = new AbortController();
-        const genreBookSignal = genreControllerRef.current.signal;
-
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const favouriteBookSignal = favouriteBookControllerRef.current.signal;
-
-        const { items: books }: any = await fetchBooks({ page: page, genreId: genreId, signal: genreBookSignal });
+        const { items: books }: any = await fetchBooks({ page: page, genreId: genreId });
 
         if (books) {
             for (let i = 0; i < books.length; i++) {
                 const book: RecordModel = books[i];
 
                 if (pb?.authStore?.model) {
-                    const isFav: boolean = await isFavouriteBook({bookId: book.id, signal: favouriteBookSignal});
+                    const isFav: boolean = await isFavouriteBook({ bookId: book.id });
                     book.is_favourite = isFav;
                 }
 
@@ -101,17 +84,9 @@ const GenreWiseBook = () => {
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (favouriteBookControllerRef.current) {
-            favouriteBookControllerRef.current.abort();
-        }
-
-        favouriteBookControllerRef.current = new AbortController();
-        const signal = favouriteBookControllerRef.current.signal;
-
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -119,14 +94,7 @@ const GenreWiseBook = () => {
     }
 
     const getGenreDetails = async () => {
-        if (genreControllerRef.current) {
-            genreControllerRef.current.abort();
-        }
-
-        genreControllerRef.current = new AbortController();
-        const signal = genreControllerRef.current.signal;
-
-        const genre = await fetchGenreDetails({genreId: genreId, signal: signal});
+        const genre = await fetchGenreDetails({ genreId: genreId });
 
         if (genre) {
             updateGenreDetails(genre);
@@ -148,7 +116,9 @@ const GenreWiseBook = () => {
     }, [genreId])
 
     useEffect(() => {
-        genreBookInView && loadGenreBookInView();
+        if (genreBookInView) {
+            loadGenreBookInView();
+        }
     }, [genreBookInView])
 
     return (
@@ -180,7 +150,7 @@ const GenreWiseBook = () => {
                                                             <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                                 {
                                                                     pb?.authStore?.model &&
-                                                                    <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                                    <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
                                                                         <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                             {
                                                                                 book.is_favourite ?

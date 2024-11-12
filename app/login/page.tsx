@@ -2,7 +2,7 @@
 
 import Footer from "@/components/footer/Footer"
 import Navbar from "@/components/header/Navbar"
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { convertUrlToFile } from "@/utils/urlToFile";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";

@@ -10,7 +10,7 @@ import { useThemeStore } from "@/store/ThemeStore";
 import { ToastContainer } from "react-toastify";
 import { usePageStore } from "@/store/PageStore";
 import { usePathname, useRouter } from "next/navigation";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 
 export const nunito = Nunito({
   weight: ['400', '500', '600'], // Define the weights you need

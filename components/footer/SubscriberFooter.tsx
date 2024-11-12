@@ -1,4 +1,4 @@
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { useSubscriberStore } from '@/store/SubscriberStore';
 import { useThemeStore } from '@/store/ThemeStore';
 import { validateEmail } from '@/utils/emailValidation';
@@ -8,14 +8,15 @@ import { ImSpinner9 } from 'react-icons/im';
 import { MdOutlineRocketLaunch } from 'react-icons/md';
 
 const SubscriberFooter = () => {
+    // Theme store
     const isDarkMode = useThemeStore((state: any) => state.isDarkMode);
+
+    // Subscriber store
     const isSubmitting = useSubscriberStore((state: any) => state.isSubmitting);
     const updateIsSubmitting = useSubscriberStore((state: any) => state.updateIsSubmitting);
 
     const emailRef = useRef<HTMLInputElement | null>(null);
     const subscriberFormRef = useRef<HTMLFormElement | null>(null);
-
-    const controllerRef = useRef<AbortController>();
 
     const handleFormError = ({ name, isError }: { name: string, isError: boolean }) => {
         switch (name) {
@@ -71,11 +72,9 @@ const SubscriberFooter = () => {
         });
     }
 
-    const isSubscriberExist = async ({email, signal}: {email: string, signal: AbortSignal}) => {
+    const isSubscriberExist = async ({email}: {email: string}) => {
         try {
-            const subRecord = await pb.collection('subscribers').getFirstListItem(`email="${email}"`, {
-                signal: signal
-            });
+            const subRecord = await pb.collection('subscribers').getFirstListItem(`email="${email}"`);
             return subRecord ? true : false;
         } catch (err) {
             return false
@@ -85,15 +84,8 @@ const SubscriberFooter = () => {
     const addSubscriber = async ({
         email
     }: { email: string }) => {
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
         // Check if subscriber already exist
-        const isSubbed = await isSubscriberExist({email: email, signal: signal});
+        const isSubbed = await isSubscriberExist({email: email});
 
         if (isSubbed) {
             makeToast({
@@ -111,9 +103,7 @@ const SubscriberFooter = () => {
         }
 
         try {
-            const subRecord = await pb.collection('subscribers').create(formData, {
-                signal: signal
-            });
+            const subRecord = await pb.collection('subscribers').create(formData);
 
             if (subRecord) {
                 makeToast({

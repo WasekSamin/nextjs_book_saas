@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { pb } from './PocketbaseStore';
+import pb from './PocketbaseStore';
 
 
 // Get user full details
@@ -7,8 +7,7 @@ const fetchUserDetails = async () => {
     try {
         const userList = await pb.collection('users').getList(1, 1, {
             sort: "-created",
-            expand: "profile",
-            requestKey: null
+            expand: "profile"
         });
 
         const { items } = userList;

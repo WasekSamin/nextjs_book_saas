@@ -4,7 +4,7 @@ import { MdOutlineRocketLaunch } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
 import { ImSpinner9 } from "react-icons/im";
 import { FileUploader } from "react-drag-drop-files";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { makeToast } from "@/utils/toastMesage";
 import { useThemeStore } from "@/store/ThemeStore";
 import { useBookStore } from "@/store/BookStore";
@@ -27,8 +27,6 @@ const RequestBookForm = () => {
     const titleRef = useRef<HTMLInputElement | null>(null);
     const authorNameRef = useRef<HTMLInputElement | null>(null);
     const publishedDateRef = useRef<any>(null);
-
-    const controllerRef = useRef<AbortController>();
 
     const handleBookFormSubmit = async (e: any) => {
         e.preventDefault();
@@ -56,25 +54,17 @@ const RequestBookForm = () => {
             return;
         };
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
         await addBookRequest({
             title: title,
             authorName: authorName,
             publishedDate: bookPublishedDate,
-            bookThumbnail: bookThumbnailFile,
-            signal: signal
+            bookThumbnail: bookThumbnailFile
         });
     }
 
     const addBookRequest = async ({
-        title, authorName, publishedDate, bookThumbnail, signal
-    }: { title: string, authorName: string, publishedDate: Date | "", bookThumbnail: File | "", signal: AbortSignal }) => {
+        title, authorName, publishedDate, bookThumbnail
+    }: { title: string, authorName: string, publishedDate: Date | "", bookThumbnail: File | "" }) => {
         const formData = {
             user: pb?.authStore?.model?.id,
             book_title: title,
@@ -85,9 +75,7 @@ const RequestBookForm = () => {
         }
 
         try {
-            const bookRequestRecord = await pb.collection('requested_books').create(formData, {
-                signal: signal
-            });
+            const bookRequestRecord = await pb.collection('requested_books').create(formData);
 
             if (bookRequestRecord) {
                 makeToast({

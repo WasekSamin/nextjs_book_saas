@@ -7,12 +7,11 @@ import { LuDownload } from "react-icons/lu";
 import { Tooltip } from "react-tooltip";
 import { useBookStore } from "@/store/BookStore";
 import { ImSpinner, ImSpinner9 } from "react-icons/im";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 import { updateBookFavouriteMode } from "@/utils/favouriteBookFunc";
 import { RecordModel } from "pocketbase";
 import { AnimatePresence } from "framer-motion";
 import PurchaseBookModal from "./PurchaseBookModal";
-import { useRef } from "react";
 
 const BookDetails = () => {
     // Book store
@@ -25,22 +24,12 @@ const BookDetails = () => {
     const showPurchasedBookModal = useBookStore((state: any) => state.showPurchasedBookModal);
     const updateShowPurchasedBookModal = useBookStore((state: any) => state.updateShowPurchasedBookModal);
 
-    const controllerRef = useRef<AbortController>();
-
     const handleFavouriteBook = async ({ book, isFav }: { book: RecordModel, isFav: boolean }) => {
         updateIsFavouriteBookSubmitting(true);
 
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
         await updateBookFavouriteMode({
             book: book,
-            isFav: isFav,
-            signal: signal
+            isFav: isFav
         });
 
         updateIsFavouriteBookSubmitting(false);
@@ -89,7 +78,7 @@ const BookDetails = () => {
                                         <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                             {
                                                 pb?.authStore?.model &&
-                                                <div className="lg:w-full flex justify-end order-2 lg:order-1">
+                                                <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
                                                     <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                         {
                                                             book.is_favourite ?

@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { logout } from '@/utils/authLogout';
 import { useRouter } from 'next/navigation';
 import { usePageStore } from '@/store/PageStore';
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 
 const NavProfile = () => {
     const showProfileModal = useNavStore((state: any) => state.showProfileModal);

@@ -26,8 +26,6 @@ const PopularGenreFilterModal = () => {
 
     const genreModalContentRef = useRef<HTMLDivElement | null>(null);
 
-    const controllerRef = useRef<AbortController>();
-
     const handleSelectPopularGenre = (tab: string) => {
         updateActiveGenre(tab);
         emptyPopGenreBooks();
@@ -53,14 +51,7 @@ const PopularGenreFilterModal = () => {
     }, [showGenreModal])
 
     const getAllGenres = async () => {
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-
-        const genres: RecordModel[] = await fetchAllGenres({ searchText: "", signal: signal });
+        const genres: RecordModel[] = await fetchAllGenres({ searchText: "" });
 
         if (genres) {
             for (let i=0; i<genres.length; i++) {

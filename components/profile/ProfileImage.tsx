@@ -1,4 +1,4 @@
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { useUserStore } from '@/store/UserStore';
 import Image from 'next/image'
 import React from 'react'

@@ -18,27 +18,18 @@ import "@/css/home/Banner.css";
 import { FaRegStar, FaStar } from 'react-icons/fa';
 import { useEffect, useRef } from 'react';
 import { fetchBooks, useBookStore } from '@/store/BookStore';
-import { pb } from '@/store/PocketbaseStore';
+import pb from '@/store/PocketbaseStore';
 import { ImSpinner } from 'react-icons/im';
 import { RecordModel } from 'pocketbase';
 
 const Banner = () => {
-    const controllerRef = useRef<AbortController>();
-
     const bannerBooks = useBookStore((state: any) => state.bannerBooks);
     const addBannerBook = useBookStore((state: any) => state.addBannerBook);
     const reRenderBannerBooks = useBookStore((state: any) => state.reRenderBannerBooks);
     const updateReRenderBannerBooks = useBookStore((state: any) => state.updateReRenderBannerBooks);
 
     const fetchBannerBooks = async (page: number) => {
-        if (controllerRef.current) {
-            controllerRef.current.abort();
-        }
-
-        controllerRef.current = new AbortController();
-        const signal = controllerRef.current.signal;
-        
-        const {items: books}: any = await fetchBooks({page: page, signal: signal});
+        const {items: books}: any = await fetchBooks({page: page});
 
         if (books) {
             for (let i=0; i<books.length; i++) {

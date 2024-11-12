@@ -1,7 +1,7 @@
 import Link from "next/link";
 import "@/css/Footer.css";
 import SubscriberFooter from "./SubscriberFooter";
-import { pb } from "@/store/PocketbaseStore";
+import pb from "@/store/PocketbaseStore";
 
 const QUICK_LINKS = [
     {
