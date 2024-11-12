@@ -150,7 +150,7 @@ const GenreWiseBook = () => {
                                                             <div className="w-full flex flex-row lg:flex-col lg:items-start justify-between lg:justify-start gap-y-5 book__customMargin">
                                                                 {
                                                                     pb?.authStore?.model &&
-                                                                    <div className="ml-5 lg:w-full flex justify-end order-2 lg:order-1">
+                                                                    <div className="lg:w-full flex justify-end order-2 lg:order-1">
                                                                         <button disabled={isFavouriteBookSubmitting} type="button" onClick={() => handleFavouriteBook({ book: book, isFav: !book.is_favourite })} className="w-fit h-fit outline-none">
                                                                             {
                                                                                 book.is_favourite ?
